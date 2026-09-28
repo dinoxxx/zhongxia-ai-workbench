@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>众夏智能工作台 · AI Workbench Demo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f4f6f9;--card:#fff;--line:#e8ecf1;--line2:#dfe5ec;
+  --txt:#1f2329;--txt2:#5f6b7a;--txt3:#98a2b0;
+  --blue:#1e6fff;--blue-bg:#eef4ff;
+  --red:#e24b4a;--red-bg:#fdeeee;
+  --green:#279a5e;--green-bg:#e9f7ef;
+  --amber:#d97706;--amber-bg:#fdf4e3;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif;background:var(--bg);color:var(--txt);font-size:14px;line-height:1.55}
+body{display:flex;min-height:100vh}
+
+/* 侧边栏 */
+.sidebar{width:216px;background:#0f1b33;color:#c7d2e4;flex-shrink:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.logo{padding:20px 20px 16px;font-size:16px;font-weight:600;color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo span{display:block;font-size:11px;font-weight:400;color:#7f8cae;margin-top:4px;letter-spacing:.4px}
+.nav{padding:12px 10px;flex:1}
+.nav .sec{font-size:11px;color:#5f6d8e;padding:14px 12px 6px;letter-spacing:.5px}
+.nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:#c7d2e4;cursor:pointer;font-size:13.5px;margin-bottom:2px;transition:background .15s}
+.nav a:hover{background:rgba(255,255,255,.06)}
+.nav a.active{background:#1e6fff;color:#fff}
+.nav a .dot{width:8px;height:8px;border-radius:2px;background:currentColor;opacity:.85;flex-shrink:0}
+.side-foot{padding:16px 20px;font-size:11px;color:#5f6d8e;border-top:1px solid rgba(255,255,255,.08);line-height:1.7}
+.side-foot b{color:#3ddc84;font-weight:500}
+
+/* 主区 */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid var(--line);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.topbar h1{font-size:17px;font-weight:600}
+.topbar .sub{font-size:12px;color:var(--txt3);margin-top:2px}
+.topbar .right{display:flex;align-items:center;gap:12px}
+.search{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 14px;font-size:12.5px;color:var(--txt3);width:220px}
+.btn{border:1px solid var(--line2);background:#fff;border-radius:8px;padding:7px 14px;font-size:12.5px;cursor:pointer;color:var(--txt2)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:#155be0}
+.btn.sm{padding:4px 10px;font-size:12px}
+.btn.danger{background:var(--red);border-color:var(--red);color:#fff}
+.sync{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green)}
+.sync::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green)}
+
+.content{padding:24px 28px;flex:1}
+.page{display:none}
+.page.active{display:block}
+
+/* 通用组件 */
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+.card h3{font-size:14px;font-weight:600;margin-bottom:4px}
+.card .hint{font-size:12px;color:var(--txt3);margin-bottom:14px}
+.grid{display:grid;gap:14px}
+.g5{grid-template-columns:repeat(5,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.kpi .label{font-size:12px;color:var(--txt2)}
+.kpi .val{font-size:24px;font-weight:600;margin-top:6px;letter-spacing:-.3px}
+.kpi .delta{font-size:12px;margin-top:4px}
+.up{color:var(--red)}
+.down{color:var(--green)}
+.kpi .extra{font-size:11px;color:var(--txt3);margin-top:6px}
+.kpi.hl{background:var(--blue);border-color:var(--blue)}
+.kpi.hl .label,.kpi.hl .delta,.kpi.hl .extra{color:#dce9ff}
+.kpi.hl .val{color:#fff}
+.kpi.warn{background:var(--amber-bg);border-color:#f3d9ac}
+.kpi.bad{background:var(--red-bg);border-color:#f3c1c1}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-weight:500;color:var(--txt2);text-align:left;padding:9px 10px;border-bottom:1px solid var(--line2);font-size:12px;background:#fafbfc}
+td{padding:9px 10px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+tr.flag td{background:var(--red-bg)}
+tr.flag td:first-child{border-left:3px solid var(--red)}
+tr.total td{font-weight:600;background:#f8fafd}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11.5px;font-weight:500}
+.tag.green{background:var(--green-bg);color:var(--green)}
+.tag.red{background:var(--red-bg);color:var(--red)}
+.tag.amber{background:var(--amber-bg);color:var(--amber)}
+.tag.blue{background:var(--blue-bg);color:var(--blue)}
+.tag.gray{background:#eef0f4;color:var(--txt2)}
+
+.pills{display:inline-flex;background:#eef0f4;border-radius:8px;padding:3px;gap:2px}
+.pills button{border:none;background:transparent;padding:5px 14px;border-radius:6px;font-size:12.5px;cursor:pointer;color:var(--txt2)}
+.pills button.active{background:#fff;color:var(--txt);box-shadow:0 1px 3px rgba(0,0,0,.08);font-weight:500}
+
+.note{font-size:12px;color:var(--txt2);background:#f8fafd;border:1px solid var(--line);border-radius:8px;padding:10px 14px;line-height:1.7}
+.note.red{background:var(--red-bg);border-color:#f3c1c1;color:#9c2b2a}
+.note.blue{background:var(--blue-bg);border-color:#c4dcff;color:#10498f}
+.stars{color:#f0b429;font-size:13px;letter-spacing:2px}
+.stars .off{color:#dde2e9}
+
+.risk-item{display:flex;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;align-items:flex-start}
+.risk-item .lv{flex-shrink:0;margin-top:2px}
+.risk-item .t{font-weight:500;font-size:13px}
+.risk-item .d{font-size:12.5px;color:var(--txt2);margin-top:2px}
+
+.split{display:grid;grid-template-columns:1fr 340px;gap:16px}
+.video-mock{background:#10141c;border-radius:10px;height:170px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.video-mock::after{content:"▶";color:#fff;font-size:30px;opacity:.9}
+.video-mock .dur{position:absolute;bottom:8px;right:10px;font-size:11px;color:#cbd5e1}
+.kv{font-size:12.5px;color:var(--txt2);line-height:2}
+.kv b{color:var(--txt);font-weight:500}
+
+.feed{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px}
+.feed:last-child{border-bottom:none}
+.feed .ico{width:26px;height:26px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.feed .ico.r{background:var(--red-bg);color:var(--red)}
+.feed .ico.b{background:var(--blue-bg);color:var(--blue)}
+.feed .ico.a{background:var(--amber-bg);color:var(--amber)}
+.feed .ico.g{background:var(--green-bg);color:var(--green)}
+.feed .t{font-weight:500}
+.feed .d{font-size:12.5px;color:var(--txt2)}
+
+/* 提案 */
+.form-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.field label{font-size:12px;color:var(--txt2);display:block;margin-bottom:6px}
+.field input,.field select{width:100%;border:1px solid var(--line2);border-radius:8px;padding:8px 12px;font-size:13px;background:#fff;outline:none}
+.field input:focus{border-color:var(--blue)}
+.checks{display:flex;gap:8px;flex-wrap:wrap}
+.checks label{border:1px solid var(--line2);border-radius:8px;padding:6px 12px;font-size:12.5px;cursor:pointer;background:#fff}
+.checks input{accent-color:var(--blue)}
+.proposal-sec{border-left:3px solid var(--blue);padding:2px 0 2px 16px;margin-bottom:20px}
+.proposal-sec h4{font-size:14px;font-weight:600;margin-bottom:6px}
+.proposal-sec p{font-size:13px;color:var(--txt2);line-height:1.8}
+.proposal-sec ul{font-size:13px;color:var(--txt2);line-height:1.9;padding-left:18px}
+
+/* Agent */
+.chat-wrap{display:grid;grid-template-columns:1fr 300px;gap:16px}
+.chat{background:#fff;border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;height:600px}
+.chat-body{flex:1;overflow-y:auto;padding:18px}
+.msg{display:flex;margin-bottom:16px;gap:10px}
+.msg .avatar{width:32px;height:32px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff}
+.msg.user .avatar{background:#5f6b7a}
+.msg.bot .avatar{background:var(--blue)}
+.msg.user{flex-direction:row-reverse}
+.bubble{max-width:78%;background:#f1f4f8;border-radius:10px;padding:10px 14px;font-size:13px;line-height:1.75}
+.msg.user .bubble{background:var(--blue);color:#fff}
+.bubble table{font-size:12.5px;background:#fff;border-radius:8px;overflow:hidden;margin-top:8px}
+.bubble th{background:#f1f4f8}
+.chat-input{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line)}
+.chat-input input{flex:1;border:1px solid var(--line2);border-radius:8px;padding:10px 14px;font-size:13px;outline:none}
+.chat-input input:focus{border-color:var(--blue)}
+.chips{display:flex;flex-direction:column;gap:8px}
+.chip{background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:12.5px;cursor:pointer;color:var(--txt2);transition:border-color .15s}
+.chip:hover{border-color:var(--blue);color:var(--blue)}
+
+.check-row{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--txt2);margin-bottom:12px}
+footer{padding:0 28px 24px;font-size:11.5px;color:var(--txt3)}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">众夏智能工作台<span>ZHONGXIA AI WORKBENCH · DEMO</span></div>
+  <div class="nav">
+    <div class="sec">工作台</div>
+    <a class="active" data-page="overview"><span class="dot" style="background:#4cc3ff"></span>总览</a>
+    <div class="sec">业务域</div>
+    <a data-page="media"><span class="dot" style="background:#1e6fff"></span>媒介经营</a>
+    <a data-page="ops"><span class="dot" style="background:#00b3a4"></span>运营盯盘</a>
+    <a data-page="creative"><span class="dot" style="background:#9c6bff"></span>素材中心</a>
+    <a data-page="proposal"><span class="dot" style="background:#f0997b"></span>提案中心</a>
+    <div class="sec">智能体</div>
+    <a data-page="agent"><span class="dot" style="background:#f0b429"></span>Agent 助手</a>
+  </div>
+  <div class="side-foot">数据同步：<b>已连接（自动刷新中）</b><br>媒体 API · 云端数仓 · 素材库<br>示例数据 · 仅作演示</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1 id="pageTitle">总览</h1>
+      <div class="sub" id="pageSub">四域汇总 · AI 今日建议</div>
+    </div>
+    <div class="right">
+      <div class="search">搜索客户 / 账户 / 素材 / 提案…</div>
+      <div class="sync">自动刷新中</div>
+      <button class="btn primary">手动刷新</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+  <!-- ============ 总览 ============ -->
+  <section class="page active" id="page-overview">
+    <div class="grid g4">
+      <div class="kpi"><div class="label">今日消耗（四端口合计）</div><div class="val">¥16,650,000</div><div class="delta up">▲ +12.3% vs 昨日</div><div class="extra">腾讯 ¥1,042万 · 巨量 ¥386万 · 快手 ¥151万 · 小红书 ¥86万</div></div>
+      <div class="kpi"><div class="label">今日 GMV</div><div class="val">¥21,480,000</div><div class="delta up">▲ +9.7%</div><div class="extra">今日综合 ROI 1.29</div></div>
+      <div class="kpi"><div class="label">2026 Q3 累计消耗</div><div class="val">¥6.82 亿</div><div class="delta down">季度日均 ¥1,482.6 万</div><div class="extra">已覆盖 46 天 · 数据完整度 46/47</div></div>
+      <div class="kpi warn"><div class="label">待处理事项</div><div class="val">3 项预警</div><div class="delta" style="color:var(--amber)">素材待审 2,246 条 · 高风险 217 条</div><div class="extra">风控 1 条高危 · 余额 1 主体预警</div></div>
+    </div>
+
+    <div class="card">
+      <h3>AI 今日建议</h3>
+      <div class="hint">由 Agent 助手跨媒介、运营、素材三个域汇总生成 · 2026-09-22</div>
+      <div class="feed"><div class="ico r">!</div><div><div class="t">风控高危：运营丙名下账户近 7 日 4 次"政治元素"拒审</div><div class="d">建议今日内复核其名下全部在投素材（37 条），并暂停批量复制策略</div></div></div>
+      <div class="feed"><div class="ico a">!</div><div><div class="t">运营异常：运营甲 / 丙 / 丁 触发红标规则</div><div class="d">今日 10:00 后 ROI&lt;1.3 或消耗&lt;1000 元。其中运营甲 ROI 0.99，接近盈亏线</div></div></div>
+      <div class="feed"><div class="ico b">i</div><div><div class="t">人才建议：新人甲入职 1.5 个月无产出增长</div><div class="d">消耗仅为同批新人乙的 13%，建议将其 39 个账户改配给新人乙或运营丙，预计提升整体产出 5–10%</div></div></div>
+      <div class="feed"><div class="ico a">!</div><div><div class="t">素材队列压力：待人工审批 2,246 条，AI 预审标记高风险 217 条</div><div class="d">建议优先处理 AI 标记的 96 条"需人工重点复核"，预计可将队列压缩 40%</div></div></div>
+      <div class="feed"><div class="ico g">✓</div><div><div class="t">返点进度：Q3 综合返点预估 ¥4,663 万，腾讯端口目标完成度 71.2%</div><div class="d">进度正常；快手端口 68.9%，略低于节奏，建议关注</div></div></div>
+    </div>
+
+    <div class="grid g3">
+      <div class="card"><h3>媒介经营</h3><div class="hint">端口消耗 · 返点测算 · 风控巡查 · 自动充值</div><div class="kv">今日实时消耗 <b>¥1,665 万</b><br>内循环占比 <b>72.9%</b> · 近 7 日节奏 <b>低于区间均值 3.1%</b><br>风控预警 <b style="color:var(--red)">4 条</b></div><button class="btn sm" data-goto="media" style="margin-top:10px">进入媒介经营 →</button></div>
+      <div class="card"><h3>运营盯盘</h3><div class="hint">跑品看板 · 红标规则 · 员工诊断 · 人才建议</div><div class="kv">今日 ROI <b>1.2255</b> · 在跑品 <b>12</b> · 在跑账户 <b>14</b><br>红标运营 <b style="color:var(--red)">3 人</b> · 淘汰建议 <b>1 条</b></div><button class="btn sm" data-goto="ops" style="margin-top:10px">进入运营盯盘 →</button></div>
+      <div class="card"><h3>素材中心</h3><div class="hint">AI 预审 · 批量审批 · 素材诊断 · 文案生成</div><div class="kv">昨天新增 <b>2,463 条</b> · 人工通过率 <b>97.5%</b><br>AI 高风险标记 <b style="color:var(--red)">217 条</b></div><button class="btn sm" data-goto="creative" style="margin-top:10px">进入素材中心 →</button></div>
+    </div>
+  </section>
+
+  <!-- ============ 媒介经营 ============ -->
+  <section class="page" id="page-media">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+        <div>
+          <h3>2026 Q3 消耗经营</h3>
+          <div class="hint">历史数据来自云端数仓 · 实时快照来自媒体 API · 每 2 小时自动同步，页面每 2 分钟自动刷新</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span class="tag gray">历史 · 云端数仓</span><span class="tag blue">实时 · 媒体 API</span>
+          <div class="pills"><button>昨日</button><button>本月</button><button class="active">本季度</button></div>
+          <div class="pills"><button>Q1</button><button>Q2</button><button class="active">Q3</button><button>Q4</button></div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:8px">今日实时消耗 · 四端口合计</h3>
+      <div class="hint">点击端口卡片可切换下方分类明细 · 数据更新于 2026-09-22 14:00</div>
+      <div class="grid g4">
+        <div class="kpi hl"><div class="label">今日实时消耗 · 合计</div><div class="val">¥16,650,000</div><div class="delta">▲ 高于季度日均 12.3%</div><div class="extra">2,816 个在投账户</div></div>
+        <div class="kpi"><div class="label">腾讯广告</div><div class="val">¥10,420,000</div><div class="delta up">▲ +8.4%</div><div class="extra">1,073 个账户 · 内循环为主</div></div>
+        <div class="kpi"><div class="label">巨量引擎</div><div class="val">¥3,860,000</div><div class="delta up">▲ +15.2%</div><div class="extra">892 个账户</div></div>
+        <div class="kpi"><div class="label">快手磁力 / 小红书聚光</div><div class="val">¥2,370,000</div><div class="delta down">▼ -3.1%</div><div class="extra">851 个账户</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>季度累计 · 端口拆分与内外循环分类</h3>
+      <div class="hint">内外循环按腾讯端口实际链路消耗占比拆分</div>
+      <div class="grid g5" style="margin-bottom:14px">
+        <div class="kpi"><div class="label">季度累计消耗</div><div class="val">¥6.82 亿</div><div class="extra">已覆盖 46 天</div></div>
+        <div class="kpi"><div class="label">腾讯广告</div><div class="val">¥4.27 亿</div><div class="extra">62.6% · 4,318 账户</div></div>
+        <div class="kpi"><div class="label">巨量引擎</div><div class="val">¥1.58 亿</div><div class="extra">23.2% · 2,940 账户</div></div>
+        <div class="kpi"><div class="label">快手磁力</div><div class="val">¥0.62 亿</div><div class="extra">9.1% · 1,208 账户</div></div>
+        <div class="kpi"><div class="label">小红书聚光</div><div class="val">¥0.35 亿</div><div class="extra">5.1% · 412 账户</div></div>
+      </div>
+      <div class="grid g5">
+        <div class="kpi"><div class="label">内循环</div><div class="val">72.9%</div><div class="extra">¥3.11 亿 · 1,314 账户</div></div>
+        <div class="kpi"><div class="label">外循环 · CID</div><div class="val">15.9%</div><div class="extra">¥0.68 亿 · 1,457 账户</div></div>
+        <div class="kpi"><div class="label">外循环 · 小程序</div><div class="val">7.1%</div><div class="extra">¥0.30 亿 · 126 账户</div></div>
+        <div class="kpi"><div class="label">外循环 · 其他</div><div class="val">2.8%</div><div class="extra">¥0.12 亿 · 107 账户</div></div>
+        <div class="kpi"><div class="label">品宣</div><div class="val">0.4%</div><div class="extra">¥0.02 亿 · 28 账户</div></div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="card" style="margin-bottom:0">
+        <h3>每日消耗走势</h3>
+        <div class="hint">柱形为每日消耗，折线为近 7 日移动平均（单位：万元）</div>
+        <div style="height:260px"><canvas id="chartMedia"></canvas></div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <h3>节奏判断</h3>
+        <div class="hint">管理层需要优先看到的结论</div>
+        <div class="kv">
+          近 7 日趋势：<b style="color:var(--amber)">低于区间均值 3.1%</b><br>
+          <span style="color:var(--txt3)">近期节奏低于历史区间日均</span><br>
+          区间最高日耗：<b>¥2,156 万</b>（08-09，较区间日均高 33.1%）<br>
+          工作日日均：<b>¥1,586 万</b> · 周末日均：<b>¥1,204 万</b><br>
+          数据完整度：<b>46 / 47 天</b>（缺 1 天）
+        </div>
+        <div class="note blue" style="margin-top:14px">建议：近 7 日节奏走低主因是运营甲、丙名下账户收缩。若维持当前节奏，Q3 将低于框架目标约 2.4%。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>返点经营测算</h3>
+      <div class="hint">返点率按 2026 年度媒体框架协议；目标完成度 = 累计消耗 / 季度框架目标</div>
+      <table>
+        <thead><tr><th>媒体端口</th><th class="num">季度累计消耗</th><th class="num">返点率</th><th class="num">返点预估</th><th class="num">框架目标</th><th class="num">完成度</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td>腾讯广告</td><td class="num">¥4.27 亿</td><td class="num">6.8%</td><td class="num">¥2,903.6 万</td><td class="num">¥6.0 亿</td><td class="num">71.2%</td><td><span class="tag green">正常</span></td></tr>
+          <tr><td>巨量引擎</td><td class="num">¥1.58 亿</td><td class="num">6.2%</td><td class="num">¥979.6 万</td><td class="num">¥2.4 亿</td><td class="num">65.8%</td><td><span class="tag green">正常</span></td></tr>
+          <tr><td>快手磁力</td><td class="num">¥0.62 亿</td><td class="num">7.5%</td><td class="num">¥465.0 万</td><td class="num">¥0.9 亿</td><td class="num">68.9%</td><td><span class="tag amber">偏慢</span></td></tr>
+          <tr><td>小红书聚光</td><td class="num">¥0.35 亿</td><td class="num">9.0%</td><td class="num">¥315.0 万</td><td class="num">¥0.5 亿</td><td class="num">70.0%</td><td><span class="tag green">正常</span></td></tr>
+          <tr class="total"><td>合计</td><td class="num">¥6.82 亿</td><td class="num">综合 6.8%</td><td class="num">¥4,663.2 万</td><td class="num">¥9.8 亿</td><td class="num">69.6%</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid g2">
+      <div class="card" style="margin-bottom:0">
+        <h3>风控巡查</h3>
+        <div class="hint">每日自动巡检 · 按风险等级排序</div>
+        <div class="risk-item"><span class="tag red lv">高危</span><div><div class="t">素材违规预警 · 运营丙</div><div class="d">名下账户近 7 日 4 次"政治元素"拒审。建议立即复核该运营名下全部 37 条在投素材，暂停批量复制策略。</div></div></div>
+        <div class="risk-item"><span class="tag amber lv">中危</span><div><div class="t">账户异常 · TX-88421（客户：六神）</div><div class="d">今日消耗骤降 -68%，疑似计划暂停或预算触顶，已推送运营负责人确认。</div></div></div>
+        <div class="risk-item"><span class="tag amber lv">中危</span><div><div class="t">预算异常 · 六神花露水</div><div class="d">今日消耗超日预算 12%，系统已自动限流并记录。</div></div></div>
+        <div class="risk-item"><span class="tag gray lv">低危</span><div><div class="t">余额不足 · 主体 C（快手）</div><div class="d">预计 1.1 天后余额耗尽，已发起自动充值申请。</div></div></div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <h3>自动充值 · 余额监控</h3>
+        <div class="hint">规则：余额 &lt; 1 天日均消耗 → 自动充值；&lt; 2 天 → 预警</div>
+        <table>
+          <thead><tr><th>主体</th><th class="num">余额</th><th class="num">预计可投</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>主体 A（腾讯 · 内循环）</td><td class="num">¥286.5 万</td><td class="num">4.1 天</td><td><span class="tag green">正常</span></td></tr>
+            <tr class="flag"><td>主体 B（巨量）</td><td class="num">¥42.3 万</td><td class="num">0.9 天</td><td><span class="tag red">已自动充值 ¥50 万 · 09:30</span></td></tr>
+            <tr><td>主体 C（快手）</td><td class="num">¥18.6 万</td><td class="num">1.1 天</td><td><span class="tag amber">预警 · 充值申请中</span></td></tr>
+            <tr><td>主体 D（小红书）</td><td class="num">¥56.0 万</td><td class="num">5.8 天</td><td><span class="tag green">正常</span></td></tr>
+          </tbody>
+        </table>
+        <div class="note" style="margin-top:12px">本月自动充值已执行 18 次，合计 ¥620 万，零人工干预，无一次断投。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 运营盯盘 ============ -->
+  <section class="page" id="page-ops">
+    <div class="card">
+      <h3>跑品 · 动态数据看板</h3>
+      <div class="hint">每 2 小时自动同步 · 页面每 2 分钟自动刷新 · 数据更新于 2026-09-22 14:21 · 历史快照 32 个</div>
+      <div class="grid g5">
+        <div class="kpi"><div class="label">今日消耗（元）</div><div class="val">5,052.56</div><div class="delta up">▲ +751.05</div></div>
+        <div class="kpi"><div class="label">今日 GMV（元）</div><div class="val">6,192.10</div><div class="delta up">▲ +877.10</div></div>
+        <div class="kpi"><div class="label">今日 ROI</div><div class="val">1.2255</div><div class="delta down">▼ -0.01</div></div>
+        <div class="kpi"><div class="label">今日在跑品</div><div class="val">12</div><div class="delta up">▲ +1.00</div></div>
+        <div class="kpi"><div class="label">今日在跑账户</div><div class="val">14</div><div class="delta up">▲ +1.00</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>总消耗趋势（今日分 2 小时段）</h3>
+      <div class="hint">今日累计消耗 5,052.56 元 · 峰值 1,340.86 元 · 当前已覆盖 12 个 2 小时段（未覆盖段显示为 0）</div>
+      <div style="height:240px"><canvas id="chartOps"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+        <div><h3>运营周期明细</h3><div class="hint" style="margin-bottom:0">单位：消耗 / GMV / 下单单价 为元；ROI = GMV ÷ 消耗</div></div>
+        <div class="pills" id="opsPills"><button class="active" data-k="day">当日</button><button data-k="yesterday">昨日</button><button data-k="week">本周</button><button data-k="month">本月</button></div>
+      </div>
+      <table id="opsTable">
+        <thead><tr><th>运营</th><th class="num">消耗</th><th class="num">GMV</th><th class="num">ROI</th><th class="num">下单数</th><th class="num">下单单价</th><th>状态</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="note red" style="margin-top:12px">红标规则：北京时间 10:00 之后，若某运营「当日」ROI &lt; 1.3 或 消耗 &lt; 1000 元，则其当日整行标红，便于快速定位异常运营。</div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card" style="margin-bottom:0">
+        <h3>员工诊断 · 运营丙</h3>
+        <div class="hint">Agent 基于近 30 日操作日志自动生成 · 每 24 小时更新</div>
+        <table>
+          <thead><tr><th>维度</th><th>评价</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>素材通过率</td><td class="stars">★★★<span class="off">★★</span></td><td>86.9% 整体不错，但个别账户低至 53%</td></tr>
+            <tr><td>操作量</td><td class="stars">★★★★<span class="off">★</span></td><td>日均 65.6 次，体量适中</td></tr>
+            <tr><td>操作质量</td><td class="stars">★★<span class="off">★★★</span></td><td>80% 是修改，反复调整效率低</td></tr>
+            <tr><td>账户管理</td><td class="stars">★★<span class="off">★★★</span></td><td>15% 闲置账户，突击式工作</td></tr>
+            <tr><td>违规风险</td><td class="stars">★★<span class="off">★★★</span></td><td>4 次政治元素拒审需警惕</td></tr>
+            <tr><td>自主性</td><td class="stars">★★<span class="off">★★★</span></td><td>26% 人工操作，62% 依赖自动化工具</td></tr>
+          </tbody>
+        </table>
+        <div class="note" style="margin-top:12px"><b>核心问题：</b>该运营的工作模式偏向"批量复制 + 大量修改"，缺乏从源头上把控素材质量和账户结构的习惯。<b>政治元素拒审是一个危险信号。</b></div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <h3>人才建议 · <span style="color:var(--red)">淘汰建议：新人甲</span></h3>
+        <div class="hint">与同批入职新人横向对比 · 近 30 日</div>
+        <table>
+          <thead><tr><th>维度</th><th class="num">新人甲</th><th class="num">新人乙（同批）</th><th class="num">差距</th></tr></thead>
+          <tbody>
+            <tr><td>消耗</td><td class="num">¥14,916</td><td class="num">¥113,184</td><td class="num">7.6 倍</td></tr>
+            <tr><td>ROI</td><td class="num">1.00</td><td class="num">1.31</td><td class="num">-31%</td></tr>
+            <tr><td>出单</td><td class="num">267 单</td><td class="num">3,306 单</td><td class="num">12.4 倍</td></tr>
+            <tr><td>户均消耗</td><td class="num">¥466</td><td class="num">¥2,461</td><td class="num">5.3 倍</td></tr>
+          </tbody>
+        </table>
+        <div class="note" style="margin-top:12px;line-height:1.8">
+          <b>核心理由：</b><br>
+          1. 消耗最低 — 仅为倒数第二的 29%，第一名的 4%<br>
+          2. ROI = 1.00 — 接近盈亏平衡线，广告投入换来零利润<br>
+          3. 产出效率极低 — 32 个活跃账户，户均消耗 ¥466，说明大量"走过场式"运营<br>
+          4. 入职 1.5 个月无增长 — 仍在消耗资源但无产出趋势
+        </div>
+        <div class="note blue" style="margin-top:10px"><b>建议：</b>将其名下 39 个账户分配给新人乙或运营丙，预计可提升 5–10% 整体产出。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 素材中心 ============ -->
+  <section class="page" id="page-creative">
+    <div class="grid g4">
+      <div class="kpi"><div class="label">昨天新增素材</div><div class="val">2,463</div><div class="extra">8 个客户 · 114 个账户同步</div></div>
+      <div class="kpi warn"><div class="label">待人工审批</div><div class="val">2,246</div><div class="extra">AI 预审已完成全部初筛</div></div>
+      <div class="kpi"><div class="label">今日已审批</div><div class="val">204</div><div class="extra">人工通过 199 · 通过率 97.5%</div></div>
+      <div class="kpi bad"><div class="label">AI 标记高风险</div><div class="val">217</div><div class="extra">其中建议优先人工复核 96 条</div></div>
+    </div>
+
+    <div class="split">
+      <div class="card" style="margin-bottom:0">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+          <div><h3>昨天新增 · 待人工审批</h3><div class="hint" style="margin-bottom:0">AI 预审按拒审风险预排序，高风险置顶 · 支持批量操作</div></div>
+          <div style="display:flex;gap:8px"><button class="btn sm">批量通过</button><button class="btn sm">批量打回</button><button class="btn sm primary">全选 AI 通过项（1,872）</button></div>
+        </div>
+        <table>
+          <thead><tr><th></th><th>创意 / 素材</th><th>客户</th><th>归属</th><th>AI 预审</th><th>审核状态</th></tr></thead>
+          <tbody id="creativeRows"></tbody>
+        </table>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <h3>素材预览</h3>
+          <div class="hint">妙思创意增强 Max · 视频</div>
+          <div class="video-mock"><span class="dur">0:00 / 0:32</span></div>
+          <div class="kv" style="margin-top:12px">
+            创意 ID：<b>B25457548648</b><br>
+            账户归属：<b>杭州XX网络 · 视频号主页</b><br>
+            服务归属：<b>众夏 · 媒介二组</b><br>
+            落地页：<b style="color:var(--blue)">视频号主页 · 小店组件</b><br>
+            AI 预审：<b style="color:var(--red)">高风险 · 画面含敏感元素</b>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px"><button class="btn sm">复制 ID</button><button class="btn sm">打回</button><button class="btn sm primary">完成审批</button></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <h3>拒审原因分布（近 30 日）</h3>
+          <div class="hint">AI 预审打回 + 媒体拒审合并统计</div>
+          <div style="height:170px"><canvas id="chartReject"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:16px">
+      <div class="card" style="margin-bottom:0">
+        <h3>AI 素材诊断 · 本周 TOP5 跑量视频特征拆解</h3>
+        <div class="hint">基于视频理解能力自动拆解（演示：六神 · 驱蚊场景）</div>
+        <div class="kv">
+          前 3 秒钩子类型：<b>悬念提问 40% · 痛点直击 30% · 价格锚点 20%</b><br>
+          平均卖点密度：<b>3.2 个 / 15 秒</b>（低于 2.5 的素材普遍跑不动）<br>
+          高消耗素材共性：<b>真人出镜 + 口播语速快 + 字幕高亮关键词</b><br>
+          共性短板：<b>第 8–12 秒流失率最高（-42%），卖点重复</b>
+        </div>
+        <button class="btn sm primary" style="margin-top:12px">生成完整诊断报告</button>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <h3>AI 文案批量生成</h3>
+        <div class="hint">投放标题 · 口播脚本 · 多版本 A/B 文案</div>
+        <div class="form-row" style="grid-template-columns:2fr 1fr 1fr 1fr">
+          <div class="field"><label>产品 / 场景</label><input value="六神花露水 · 夏季驱蚊场景"></div>
+          <div class="field"><label>类型</label><select><option>投放标题</option><option>口播脚本</option><option>图文卖点</option></select></div>
+          <div class="field"><label>数量</label><select><option>6 条</option><option>12 条</option><option>20 条</option></select></div>
+          <div class="field"><label>&nbsp;</label><button class="btn primary" style="width:100%">生成</button></div>
+        </div>
+        <table>
+          <tbody>
+            <tr><td>1. 喷一次管 8 小时，这个夏天蚊子绕着走</td><td class="num"><span class="tag green">AI 评分 92</span></td></tr>
+            <tr><td>2. 宝妈圈都在囤的驱蚊水，成分表我替你查过了</td><td class="num"><span class="tag green">AI 评分 89</span></td></tr>
+            <tr><td>3. 露营被咬 17 个包之后，我换掉了原来的驱蚊水</td><td class="num"><span class="tag green">AI 评分 87</span></td></tr>
+            <tr><td>4. 老国货的新用法：拖地加两滴，全屋没蚊子</td><td class="num"><span class="tag amber">AI 评分 81</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 提案中心 ============ -->
+  <section class="page" id="page-proposal">
+    <div class="card">
+      <h3>AI 提案生成器</h3>
+      <div class="hint">输入客户信息，自动生成投放提案大纲（行业洞察 · 素材策略 · 投放节奏 · 预算分配 · 效果预估）</div>
+      <div class="form-row">
+        <div class="field"><label>客户名称</label><input value="六神（家化）"></div>
+        <div class="field"><label>行业</label><select><option>快消 / 家清个护</option><option>美妆</option><option>食品饮料</option><option>3C 家电</option></select></div>
+        <div class="field"><label>月预算（万元）</label><input value="30"></div>
+        <div class="field"><label>投放目标</label><select><option>GMV / ROI</option><option>品牌曝光</option><option>线索收集</option></select></div>
+      </div>
+      <div class="field" style="margin-bottom:12px"><label>目标平台</label>
+        <div class="checks"><label><input type="checkbox" checked> 腾讯广告（视频号）</label><label><input type="checkbox" checked> 巨量引擎（抖音）</label><label><input type="checkbox"> 快手磁力</label><label><input type="checkbox"> 小红书聚光</label></div>
+      </div>
+      <button class="btn primary" id="genBtn">生成提案大纲</button>
+    </div>
+
+    <div class="split" id="proposalOut" style="display:block">
+      <div class="card" style="margin-bottom:0">
+        <h3>提案大纲 · 六神花露水视频号投放方案（示例）</h3>
+        <div class="hint">AI 生成 · 2026-09-22 · 引用行业数据与素材中心洞察</div>
+
+        <div class="proposal-sec"><h4>一、行业与人群洞察</h4>
+          <p>家清个护赛道 2025 年线上增速 12.4%，驱蚊品类 5–8 月为销售高峰，9 月进入换季囤货与户外场景窗口期。核心人群：25–45 岁家庭女性（决策人）、露营 / 户外人群（增量）。视频类信息流广告为大盘增长最快品类（2025 同比 +18.85%），建议以视频为主力形态。</p></div>
+
+        <div class="proposal-sec"><h4>二、素材策略</h4>
+          <ul><li>主力：15–30 秒真人出镜短视频，前 3 秒钩子采用"痛点直击 + 悬念提问"</li>
+          <li>辅助：口播脚本 5 条（AI 已生成初稿）+ 图文 20 张（场景化卖点）</li>
+          <li>测试矩阵：3 个卖点方向 × 2 种钩子 × 2 种人群定向，共 12 组素材进入冷启动</li></ul></div>
+
+        <div class="proposal-sec"><h4>三、投放节奏（三阶段）</h4>
+          <ul><li><b>冷启动（第 1–7 天）</b>：消耗占 20%，跑通素材通过率与人群定向，目标建立 3 条跑量计划</li>
+          <li><b>爬坡（第 8–21 天）</b>：消耗占 50%，放量优质素材，淘汰 CTR 低于均值 30% 的素材</li>
+          <li><b>爆发（第 22–30 天）</b>：消耗占 30%，聚焦 TOP3 素材加预算，配合直播间引流</li></ul></div>
+
+        <div class="proposal-sec"><h4>四、预算分配</h4>
+          <ul><li>腾讯广告（视频号）：<b>¥18 万 / 60%</b> —— 内循环小店直投为主</li>
+          <li>巨量引擎（抖音）：<b>¥12 万 / 40%</b> —— 外循环 CID 引流视频号小店</li></ul></div>
+
+        <div class="proposal-sec"><h4>五、GMV / ROI 预估</h4>
+          <p>按当前大盘同类目基准：预估月 GMV <b>¥48 万</b>，综合 ROI <b>1.6</b>；保守 / 中性 / 乐观三档：1.3 / 1.6 / 1.9。预估基于近 90 天同品类账户历史数据，供客户决策参考。</p></div>
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <h3>预算分配</h3>
+          <div style="height:180px"><canvas id="chartBudget"></canvas></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <h3>行业素材洞察（来自素材中心）</h3>
+          <div class="hint">同品类近 30 日跑量素材共性</div>
+          <div class="kv">跑量率最高的钩子：<b>"效果对比 + 价格锚点"</b><br>视频最佳时长：<b>18–25 秒</b><br>高转化场景：<b>母婴 / 露营 / 居家拖地</b><br>建议规避：<b>"最""第一"等绝对化用语（拒审高发）</b></div>
+          <button class="btn sm" style="margin-top:10px">查看 12 条参考素材 →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Agent 助手 ============ -->
+  <section class="page" id="page-agent">
+    <div class="chat-wrap">
+      <div class="chat">
+        <div class="chat-body" id="chatBody">
+          <div class="msg bot"><div class="avatar">AI</div><div class="bubble">早上好。我是众夏 Agent，已经连上媒介、运营、素材、提案四个域的数据。<br>今天有三件事需要你优先处理：<br>1. 风控高危：运营丙名下 4 次政治元素拒审；<br>2. 运营盯盘：3 人触发红标规则；<br>3. 素材队列：96 条高风险素材待人工复核。<br>你可以直接问我，例如"帮我盯一下今天的盘"。</div></div>
+        </div>
+        <div class="chat-input">
+          <input id="chatInput" placeholder="问点什么，比如：运营丙最近怎么样？" onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="btn primary" onclick="sendChat()">发送</button>
+        </div>
+      </div>
+      <div class="chips">
+        <div class="chip" onclick="ask('帮我盯一下今天的盘')">帮我盯一下今天的盘</div>
+        <div class="chip" onclick="ask('运营丙最近表现怎么样')">运营丙最近表现怎么样</div>
+        <div class="chip" onclick="ask('本周素材审核压力多大')">本周素材审核压力多大</div>
+        <div class="chip" onclick="ask('Q3 返点进度核一下')">Q3 返点进度核一下</div>
+        <div class="chip" onclick="ask('把六神提案的预算分配再核一遍')">把六神提案的预算分配再核一遍</div>
+      </div>
+    </div>
+  </section>
+
+  </div>
+  <footer>众夏智能工作台 Demo · 所有数据均为示例数据 · 红标规则、AI 预审、Agent 诊断为演示逻辑 · 2026-09-22</footer>
+</div>
+
+<script>
+var pages = {
+  overview:['总览','四域汇总 · AI 今日建议'],
+  media:['媒介经营','端口消耗 · 内外循环 · 返点测算 · 风控巡查 · 自动充值'],
+  ops:['运营盯盘','跑品看板 · 红标规则 · 员工诊断 · 人才建议'],
+  creative:['素材中心','AI 预审 · 批量审批 · 素材诊断 · 文案生成'],
+  proposal:['提案中心','AI 提案生成器 · 行业素材洞察'],
+  agent:['Agent 助手','盯盘 · 诊断 · 监控 · 问答']
+};
+var charts = {};
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav a').forEach(function(a){a.classList.toggle('active', a.dataset.page===id)});
+  document.getElementById('pageTitle').textContent = pages[id][0];
+  document.getElementById('pageSub').textContent = pages[id][1];
+  initCharts(id);
+}
+document.querySelectorAll('.nav a').forEach(function(a){a.addEventListener('click',function(){showPage(a.dataset.page)})});
+document.querySelectorAll('[data-goto]').forEach(function(b){b.addEventListener('click',function(){showPage(b.dataset.goto)})});
+
+/* ===== 图表 ===== */
+function initCharts(id){
+  if(id==='media' && !charts.media){
+    var labels=[], data=[];
+    var base=1200;
+    for(var i=0;i<47;i++){
+      var d=new Date(2026,6,1+i);
+      labels.push((d.getMonth()+1)+'/'+d.getDate());
+      var wob=Math.sin(i/4.5)*260 + Math.sin(i/9)*180;
+      var wk=(d.getDay()===0||d.getDay()===6)?-320:60;
+      data.push(Math.round(base+wob+wk+i*6));
+    }
+    var avg7=data.map(function(_,i){
+      var s=0,n=0;
+      for(var j=Math.max(0,i-6);j<=i;j++){s+=data[j];n++}
+      return Math.round(s/n);
+    });
+    var qa=Math.round(data.reduce(function(a,b){return a+b})/data.length);
+    charts.media=new Chart(document.getElementById('chartMedia'),{type:'bar',
+      data:{labels:labels,datasets:[
+        {label:'每日消耗',data:data,backgroundColor:'#bcd4ff',borderRadius:2,barPercentage:0.7},
+        {label:'近7日均',data:avg7,type:'line',borderColor:'#1e6fff',borderWidth:2,pointRadius:0,tension:0.35},
+        {label:'季度日均',data:labels.map(function(){return qa}),type:'line',borderColor:'#98a2b0',borderDash:[6,5],borderWidth:1.5,pointRadius:0}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}},
+        scales:{x:{ticks:{font:{size:10},maxTicksLimit:12},grid:{display:false}},y:{grid:{color:'#eef1f5'},ticks:{font:{size:10}}}}}});
+  }
+  if(id==='ops' && !charts.ops){
+    var lb=['00-02','02-04','04-06','06-08','08-10','10-12','12-14','14-16','16-18','18-20','20-22','22-24'];
+    var dd=[870,160,290,1290,1010,680,720,90,10,0,0,0];
+    charts.ops=new Chart(document.getElementById('chartOps'),{type:'bar',
+      data:{labels:lb,datasets:[
+        {label:'2小时段消耗（元）',data:dd,backgroundColor:'#1e6fff',borderRadius:4,barPercentage:0.6},
+        {label:'走势',data:dd,type:'line',borderColor:'#0f1b33',borderWidth:2,pointRadius:3,pointBackgroundColor:'#fff',tension:0.3}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#eef1f5'},ticks:{font:{size:10}}}}}});
+  }
+  if(id==='creative' && !charts.reject){
+    charts.reject=new Chart(document.getElementById('chartReject'),{type:'doughnut',
+      data:{labels:['政治元素','夸大宣传','竞品对比','版权风险','其他'],datasets:[{data:[38,26,14,12,10],backgroundColor:['#e24b4a','#f0997b','#f0b429','#9c6bff','#b4b2a9'],borderWidth:2,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{boxWidth:10,font:{size:11}}}}}});
+  }
+  if(id==='proposal' && !charts.budget){
+    charts.budget=new Chart(document.getElementById('chartBudget'),{type:'doughnut',
+      data:{labels:['腾讯广告 ¥18万 · 60%','巨量引擎 ¥12万 · 40%'],datasets:[{data:[18,12],backgroundColor:['#1e6fff','#4cc3ff'],borderWidth:2,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}}});
+  }
+}
+
+/* ===== 运营周期明细 ===== */
+var opsData={
+  day:{rows:[
+    {n:'运营甲',c:884.68,g:879.90,r:0.9948,o:18,p:48.88},
+    {n:'运营乙',c:2902.81,g:3815.50,r:1.3144,o:128,p:29.81},
+    {n:'运营丙',c:715.47,g:698.70,r:0.9766,o:13,p:53.75},
+    {n:'运营丁',c:549.60,g:798.00,r:1.4520,o:20,p:39.90}],
+    total:{c:5052.56,g:6192.10,r:1.2256,o:179,p:34.59}},
+  yesterday:{rows:[
+    {n:'运营甲',c:3707.10,g:5007.90,r:1.3426,o:93,p:53.66},
+    {n:'运营乙',c:3838.86,g:4857.80,r:1.2054,o:163,p:29.80},
+    {n:'运营丙',c:10388.00,g:14058.20,r:1.3532,o:276,p:50.94},
+    {n:'运营丁',c:616.19,g:718.20,r:1.1655,o:18,p:39.90}],
+    total:{c:18641.14,g:24732.10,r:1.3267,o:552,p:44.80}},
+  week:{rows:[
+    {n:'运营甲',c:4591.78,g:5887.80,r:1.2822,o:111,p:53.04},
+    {n:'运营乙',c:6741.67,g:8673.30,r:1.2866,o:291,p:29.81},
+    {n:'运营丙',c:11103.47,g:14756.90,r:1.3292,o:289,p:51.06},
+    {n:'运营丁',c:1165.79,g:1516.20,r:1.3006,o:38,p:39.90}],
+    total:{c:23602.71,g:30834.20,r:1.3064,o:729,p:42.30}},
+  month:{rows:[
+    {n:'运营甲',c:19860.30,g:26120.40,r:1.3152,o:482,p:54.19},
+    {n:'运营乙',c:28910.20,g:37240.50,r:1.2881,o:1246,p:29.89},
+    {n:'运营丙',c:46230.80,g:61420.60,r:1.3285,o:1202,p:51.10},
+    {n:'运营丁',c:5480.20,g:7120.80,r:1.2994,o:178,p:40.00}],
+    total:{c:100481.50,g:131902.30,r:1.3127,o:3108,p:42.45}}
+};
+function fmt(n){return n.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function renderOps(k){
+  var d=opsData[k], html='';
+  d.rows.forEach(function(r){
+    var flag=(k==='day')&&(r.r<1.3||r.c<1000);
+    html+='<tr'+(flag?' class="flag"':'')+'><td>'+r.n+'</td><td class="num">'+fmt(r.c)+'</td><td class="num">'+fmt(r.g)+'</td><td class="num">'+r.r.toFixed(4)+'</td><td class="num">'+r.o+'</td><td class="num">'+fmt(r.p)+'</td><td>'+(flag?'<span class="tag red">红标</span>':'<span class="tag green">正常</span>')+'</td></tr>';
+  });
+  html+='<tr class="total"><td>总计</td><td class="num">'+fmt(d.total.c)+'</td><td class="num">'+fmt(d.total.g)+'</td><td class="num">'+d.total.r.toFixed(4)+'</td><td class="num">'+d.total.o+'</td><td class="num">'+fmt(d.total.p)+'</td><td>—</td></tr>';
+  document.querySelector('#opsTable tbody').innerHTML=html;
+}
+document.querySelectorAll('#opsPills button').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('#opsPills button').forEach(function(x){x.classList.remove('active')});
+    b.classList.add('active'); renderOps(b.dataset.k);
+  });
+});
+renderOps('day');
+
+/* ===== 素材表格 ===== */
+var creatives=[
+  {id:'妙思创意增强Max-B25457548648',type:'视频 0:32',c:'杭州XX网络',own:'视频号主页',ai:'bad',ait:'高风险 · 政治元素',st:'wait'},
+  {id:'妙思创意增强Max-B349078960',type:'视频 0:45',c:'上海XX食品',own:'H5 落地页',ai:'ok',ait:'通过',st:'pass'},
+  {id:'HS-原创-JN-刀孤岁-8-25',type:'图片',c:'广州XX美妆',own:'小程序',ai:'ok',ait:'通过',st:'pass'},
+  {id:'HS-原创-cky-霜儿家真声-J2-视频号(9)',type:'视频 0:28',c:'上海XX食品',own:'H5 落地页',ai:'warn',ait:'需人工 · 绝对化用语',st:'wait'},
+  {id:'HS-原创-cky-霜儿家真声-J2-视频号(13)',type:'视频 0:41',c:'杭州XX健康',own:'H5 落地页',ai:'ok',ait:'通过',st:'wait'},
+  {id:'HS-原创-cky-霜儿家真声-J2-视频号(7)',type:'视频 0:33',c:'北京众夏',own:'视频号主页',ai:'ok',ait:'通过',st:'reject'},
+  {id:'创意增强Max-20260616',type:'视频 0:26',c:'六神（家化）',own:'视频号小店',ai:'ok',ait:'通过',st:'pass'},
+  {id:'图文-夏季驱蚊场景-v3',type:'图片 ×6',c:'六神（家化）',own:'视频号小店',ai:'warn',ait:'需人工 · 功效宣称',st:'wait'}
+];
+var stMap={wait:'<span class="tag gray">待审核</span>',pass:'<span class="tag green">已通过</span>',reject:'<span class="tag red">已打回</span>'};
+var aiMap={ok:'<span class="tag green">AI 通过</span>',warn:'<span class="tag amber">需人工</span>',bad:'<span class="tag red">高风险</span>'};
+document.getElementById('creativeRows').innerHTML=creatives.map(function(r,i){
+  var flag=r.ai==='bad'?' class="flag"':'';
+  return '<tr'+flag+'><td><input type="checkbox"></td><td><b style="font-weight:500">'+r.id+'</b><br><span style="font-size:11.5px;color:var(--txt3)">'+r.type+'</span></td><td>'+r.c+'</td><td>'+r.own+'</td><td>'+aiMap[r.ai]+'<br><span style="font-size:11.5px;color:var(--txt3)">'+r.ait+'</span></td><td>'+stMap[r.st]+'</td></tr>';
+}).join('');
+
+/* ===== Agent 聊天 ===== */
+var answers={
+  '盘':'今天的盘面（14:21 更新）：\n· 今日消耗 ¥16,650,000，较昨日 +12.3%，高于季度日均\n· 今日 GMV ¥21,480,000，综合 ROI 1.29\n· 红标提醒：运营甲（ROI 0.99）、运营丙（ROI 0.98）、运营丁（消耗 ¥549.6 < 1000）触发红标规则\n· 重点关注：客户「六神」账户 TX-88421 今日消耗骤降 -68%，已推送负责人确认\n建议先看运营盯盘的 2 小时分段趋势，下午 14 点后大盘明显缩量。',
+  '丙':'运营丙近 30 日诊断（每日自动更新）：\n· 素材通过率 86.9%（★★★），但个别账户低至 53%\n· 日均操作 65.6 次（★★★★），但 80% 是修改，反复调整效率低（★★）\n· 15% 账户闲置，突击式工作（★★）\n· 近 7 日 4 次"政治元素"拒审（★★，危险信号）\n· 62% 操作依赖自动化工具（★★）\n核心问题：工作模式偏向"批量复制 + 大量修改"，缺乏从源头把控素材质量和账户结构的习惯。建议今日内复核其名下 37 条在投素材。',
+  '素材':'本周素材队列：\n· 昨天新增 2,463 条，待人工审批 2,246 条\n· AI 预审已全部完成：标记高风险 217 条，其中 96 条建议优先复核\n· 今日已审批 204 条，人工通过率 97.5%\n· 拒审原因 Top3：政治元素 38%、夸大宣传 26%、竞品对比 14%\n建议：先批量通过 AI 放行的 1,872 条，再集中处理 96 条高风险，预计可把队列压缩 40%。',
+  '返点':'Q3 返点经营测算（截至 09-22）：\n· 季度累计消耗 ¥6.82 亿，综合返点率 6.8%，返点预估 ¥4,663.2 万\n· 腾讯：¥4.27 亿 · 返点 6.8% · 目标完成度 71.2%（正常）\n· 巨量：¥1.58 亿 · 返点 6.2% · 65.8%（正常）\n· 快手：¥0.62 亿 · 返点 7.5% · 68.9%（偏慢，建议关注）\n· 小红书：¥0.35 亿 · 返点 9.0% · 70.0%（正常）\n整体进度 69.6%，若近 7 日节奏（低于区间均值 3.1%）延续，Q3 预计低于框架目标约 2.4%。',
+  '六神':'六神提案的预算分配（月预算 ¥30 万）：\n· 腾讯广告（视频号）¥18 万 / 60% —— 内循环小店直投为主\n· 巨量引擎（抖音）¥12 万 / 40% —— 外循环 CID 引流视频号小店\n节奏：冷启动 20% → 爬坡 50% → 爆发 30%\n预估：月 GMV ¥48 万，综合 ROI 1.6（保守 1.3 / 乐观 1.9）\n提醒：六神今日有 1 个账户消耗骤降 -68%、另有 1 次超日预算 12% 已自动限流，建议提案节奏表与该账户现状对齐后再发客户。'
+};
+function pick(q){
+  if(q.indexOf('丙')>-1)return answers['丙'];
+  if(q.indexOf('素材')>-1||q.indexOf('审核')>-1)return answers['素材'];
+  if(q.indexOf('返点')>-1)return answers['返点'];
+  if(q.indexOf('六神')>-1||q.indexOf('预算')>-1||q.indexOf('提案')>-1)return answers['六神'];
+  if(q.indexOf('盘')>-1||q.indexOf('盯')>-1||q.indexOf('今天')>-1)return answers['盘'];
+  return '我已经连上媒介、运营、素材、提案四个域。目前我能回答：今日盘面、单个运营的诊断、素材队列、返点进度、提案数据。你可以试试左侧的几个快捷问题。';
+}
+function addMsg(role,text){
+  var b=document.getElementById('chatBody');
+  var d=document.createElement('div');
+  d.className='msg '+role;
+  d.innerHTML='<div class="avatar">'+(role==='bot'?'AI':'我')+'</div><div class="bubble">'+text.replace(/\n/g,'<br>')+'</div>';
+  b.appendChild(d); b.scrollTop=b.scrollHeight;
+}
+function ask(q){
+  addMsg('user',q);
+  setTimeout(function(){addMsg('bot',pick(q))},450);
+}
+function sendChat(){
+  var i=document.getElementById('chatInput');
+  if(!i.value.trim())return;
+  ask(i.value.trim()); i.value='';
+}
+</script>
+</body>
+</html>
