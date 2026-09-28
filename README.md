@@ -7,8 +7,10 @@
 启用 GitHub Pages 后访问：
 
 ```
-https://<你的用户名>.github.io/zhongxia-ai-workbench/
+https://dinoxxx.github.io/zhongxia-ai-workbench/
 ```
+
+仓库地址：https://github.com/dinoxxx/zhongxia-ai-workbench
 
 ## 技术说明
 
