@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>众夏智能工作台 · AI Workbench Demo</title>
+<title>众夏 AI 工作台 · 整合版 Demo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -14,6 +14,8 @@
   --red:#e24b4a;--red-bg:#fdeeee;
   --green:#279a5e;--green-bg:#e9f7ef;
   --amber:#d97706;--amber-bg:#fdf4e3;
+  --teal:#0f766e;--teal-bg:#ecfdf9;
+  --purple:#9c6bff;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif;background:var(--bg);color:var(--txt);font-size:14px;line-height:1.55}
 body{display:flex;min-height:100vh}
@@ -22,7 +24,7 @@ body{display:flex;min-height:100vh}
 .sidebar{width:216px;background:#0f1b33;color:#c7d2e4;flex-shrink:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
 .logo{padding:20px 20px 16px;font-size:16px;font-weight:600;color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
 .logo span{display:block;font-size:11px;font-weight:400;color:#7f8cae;margin-top:4px;letter-spacing:.4px}
-.nav{padding:12px 10px;flex:1}
+.nav{padding:12px 10px;flex:1;overflow-y:auto}
 .nav .sec{font-size:11px;color:#5f6d8e;padding:14px 12px 6px;letter-spacing:.5px}
 .nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:#c7d2e4;cursor:pointer;font-size:13.5px;margin-bottom:2px;transition:background .15s}
 .nav a:hover{background:rgba(255,255,255,.06)}
@@ -50,6 +52,27 @@ body{display:flex;min-height:100vh}
 .page{display:none}
 .page.active{display:block}
 
+/* 核心理念 & 角色跃迁 */
+.thesis{background:linear-gradient(135deg,#16324a 0%,#0f766e 130%);color:#fff;border-radius:12px;padding:14px 20px;margin-bottom:16px;font-size:13px;line-height:1.8}
+.thesis b{color:#7ef0d4}
+.brain{background:linear-gradient(135deg,#0f1b33 0%,#1e6fff 130%);color:#fff;border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:13px;line-height:1.8}
+.brain b{color:#9cc2ff}
+.flow{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:16px}
+.flow .ft{font-size:13px;font-weight:700;margin-bottom:10px}
+.flow .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.flow .lbl{font-size:12px;color:var(--txt3);width:38px;flex:none}
+.fchip{background:#f1f4f8;border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--txt2)}
+.fchip.future{background:var(--teal-bg);border-color:#b8e6dd;color:var(--teal);font-weight:600}
+.arrow{color:#b6c2ce;font-size:12px}
+.leap{font-size:12.5px;color:var(--teal);background:var(--teal-bg);border-radius:6px;padding:5px 10px;margin-top:4px;display:inline-block}
+
+/* 政策 → 业务指令 */
+.cmd{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;margin-top:7px;padding:7px 10px;border-radius:6px;line-height:1.6}
+.cmd.ops{background:var(--blue-bg);color:#10498f}
+.cmd.sales{background:var(--green-bg);color:#1c7a4a}
+.cmd .ico-tag{flex:none;font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px;background:#fff;border:1px solid currentColor;margin-top:1px}
+.newbadge{display:inline-block;background:var(--red);color:#fff;font-size:10px;font-weight:700;border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:2px}
+
 /* 通用组件 */
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
 .card h3{font-size:14px;font-weight:600;margin-bottom:4px}
@@ -59,6 +82,7 @@ body{display:flex;min-height:100vh}
 .g4{grid-template-columns:repeat(4,1fr)}
 .g3{grid-template-columns:repeat(3,1fr)}
 .g2{grid-template-columns:repeat(2,1fr)}
+@media (max-width:1280px){.g5{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(2,1fr)}}
 .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px}
 .kpi .label{font-size:12px;color:var(--txt2)}
 .kpi .val{font-size:24px;font-weight:600;margin-top:6px;letter-spacing:-.3px}
@@ -74,7 +98,7 @@ body{display:flex;min-height:100vh}
 
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{font-weight:500;color:var(--txt2);text-align:left;padding:9px 10px;border-bottom:1px solid var(--line2);font-size:12px;background:#fafbfc}
-td{padding:9px 10px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 tr:last-child td{border-bottom:none}
 tr.flag td{background:var(--red-bg)}
 tr.flag td:first-child{border-left:3px solid var(--red)}
@@ -86,6 +110,7 @@ tr.total td{font-weight:600;background:#f8fafd}
 .tag.red{background:var(--red-bg);color:var(--red)}
 .tag.amber{background:var(--amber-bg);color:var(--amber)}
 .tag.blue{background:var(--blue-bg);color:var(--blue)}
+.tag.teal{background:var(--teal-bg);color:var(--teal)}
 .tag.gray{background:#eef0f4;color:var(--txt2)}
 
 .pills{display:inline-flex;background:#eef0f4;border-radius:8px;padding:3px;gap:2px}
@@ -104,6 +129,7 @@ tr.total td{font-weight:600;background:#f8fafd}
 .risk-item .d{font-size:12.5px;color:var(--txt2);margin-top:2px}
 
 .split{display:grid;grid-template-columns:1fr 340px;gap:16px}
+@media (max-width:1280px){.split{grid-template-columns:1fr}}
 .video-mock{background:#10141c;border-radius:10px;height:170px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .video-mock::after{content:"▶";color:#fff;font-size:30px;opacity:.9}
 .video-mock .dur{position:absolute;bottom:8px;right:10px;font-size:11px;color:#cbd5e1}
@@ -119,9 +145,34 @@ tr.total td{font-weight:600;background:#f8fafd}
 .feed .ico.g{background:var(--green-bg);color:var(--green)}
 .feed .t{font-weight:500}
 .feed .d{font-size:12.5px;color:var(--txt2)}
+.feed .src{font-size:11.5px;color:var(--txt3);margin-top:3px}
+
+/* AI 信息流卡片 */
+.aicard{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.aicard .hd{display:flex;align-items:flex-start;gap:8px}
+.aicard .tt{font-weight:700;font-size:13.5px;flex:1}
+.score{flex:none;min-width:38px;text-align:center;border-radius:8px;padding:3px 6px;font-weight:800;font-size:17px}
+.score.hi{background:var(--teal-bg);color:var(--teal)}
+.score.md{background:var(--amber-bg);color:var(--amber)}
+.score.lo{background:var(--red-bg);color:var(--red)}
+.aicard .tags{display:flex;gap:5px;flex-wrap:wrap;margin:7px 0 5px}
+.aicard .ds{font-size:12.5px;color:var(--txt2)}
+.aicard .src-line{font-size:11.5px;color:var(--txt3);margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+
+/* AI 建议 · 人工判断点 */
+.judge .aicard{border-left:3px solid var(--teal)}
+.judge .aicard.risk{border-left-color:var(--amber)}
+.check{font-size:12.5px;margin-top:6px;display:flex;gap:6px;align-items:flex-start}
+.check::before{content:"☐";color:var(--teal);font-size:14px;line-height:1.3}
+.ai-tag{display:inline-block;font-size:11px;background:var(--teal-bg);color:var(--teal);border-radius:4px;padding:1px 7px;font-weight:600;margin-bottom:6px}
+.ai-tag.warn{background:var(--amber-bg);color:var(--amber)}
+
+.bar{height:6px;border-radius:3px;background:#edf1f5;overflow:hidden;min-width:60px;margin-top:4px}
+.bar i{display:block;height:100%;border-radius:3px}
 
 /* 提案 */
 .form-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+@media (max-width:1280px){.form-row{grid-template-columns:repeat(2,1fr)}}
 .field label{font-size:12px;color:var(--txt2);display:block;margin-bottom:6px}
 .field input,.field select{width:100%;border:1px solid var(--line2);border-radius:8px;padding:8px 12px;font-size:13px;background:#fff;outline:none}
 .field input:focus{border-color:var(--blue)}
@@ -135,6 +186,7 @@ tr.total td{font-weight:600;background:#f8fafd}
 
 /* Agent */
 .chat-wrap{display:grid;grid-template-columns:1fr 300px;gap:16px}
+@media (max-width:1280px){.chat-wrap{grid-template-columns:1fr}}
 .chat{background:#fff;border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;height:600px}
 .chat-body{flex:1;overflow-y:auto;padding:18px}
 .msg{display:flex;margin-bottom:16px;gap:10px}
@@ -144,8 +196,6 @@ tr.total td{font-weight:600;background:#f8fafd}
 .msg.user{flex-direction:row-reverse}
 .bubble{max-width:78%;background:#f1f4f8;border-radius:10px;padding:10px 14px;font-size:13px;line-height:1.75}
 .msg.user .bubble{background:var(--blue);color:#fff}
-.bubble table{font-size:12.5px;background:#fff;border-radius:8px;overflow:hidden;margin-top:8px}
-.bubble th{background:#f1f4f8}
 .chat-input{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line)}
 .chat-input input{flex:1;border:1px solid var(--line2);border-radius:8px;padding:10px 14px;font-size:13px;outline:none}
 .chat-input input:focus{border-color:var(--blue)}
@@ -153,33 +203,32 @@ tr.total td{font-weight:600;background:#f8fafd}
 .chip{background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:12.5px;cursor:pointer;color:var(--txt2);transition:border-color .15s}
 .chip:hover{border-color:var(--blue);color:var(--blue)}
 
-.check-row{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--txt2);margin-bottom:12px}
 footer{padding:0 28px 24px;font-size:11.5px;color:var(--txt3)}
 </style>
 </head>
 <body>
 
 <aside class="sidebar">
-  <div class="logo">众夏智能工作台<span>ZHONGXIA AI WORKBENCH · DEMO</span></div>
+  <div class="logo">众夏 AI 工作台<span>ZHONGXIA AI WORKBENCH · 整合版</span></div>
   <div class="nav">
     <div class="sec">工作台</div>
-    <a class="active" data-page="overview"><span class="dot" style="background:#4cc3ff"></span>总览</a>
+    <a class="active" data-page="boss"><span class="dot" style="background:#4cc3ff"></span>经营驾驶舱</a>
     <div class="sec">业务域</div>
-    <a data-page="media"><span class="dot" style="background:#1e6fff"></span>媒介经营</a>
+    <a data-page="media"><span class="dot" style="background:#1e6fff"></span>媒介经营 · 大脑</a>
     <a data-page="ops"><span class="dot" style="background:#00b3a4"></span>运营盯盘</a>
     <a data-page="creative"><span class="dot" style="background:#9c6bff"></span>素材中心</a>
-    <a data-page="proposal"><span class="dot" style="background:#f0997b"></span>提案中心</a>
+    <a data-page="sales"><span class="dot" style="background:#f0997b"></span>销售与提案</a>
     <div class="sec">智能体</div>
     <a data-page="agent"><span class="dot" style="background:#f0b429"></span>Agent 助手</a>
   </div>
-  <div class="side-foot">数据同步：<b>已连接（自动刷新中）</b><br>媒体 API · 云端数仓 · 素材库<br>示例数据 · 仅作演示</div>
+  <div class="side-foot">数据同步：<b>已连接（自动刷新中）</b><br>媒体 API · 云端数仓 · 素材库 · CRM · 京准通（待签约）<br>示例数据 · 仅作演示</div>
 </aside>
 
 <div class="main">
   <div class="topbar">
     <div>
-      <h1 id="pageTitle">总览</h1>
-      <div class="sub" id="pageSub">四域汇总 · AI 今日建议</div>
+      <h1 id="pageTitle">经营驾驶舱</h1>
+      <div class="sub" id="pageSub">五域汇总 · AI 今日建议 · 一屏决策</div>
     </div>
     <div class="right">
       <div class="search">搜索客户 / 账户 / 素材 / 提案…</div>
@@ -190,34 +239,160 @@ footer{padding:0 28px 24px;font-size:11.5px;color:var(--txt3)}
 
   <div class="content">
 
-  <!-- ============ 总览 ============ -->
-  <section class="page active" id="page-overview">
+  <!-- ============ 经营驾驶舱 ============ -->
+  <section class="page active" id="page-boss">
+    <div class="thesis">
+      核心理念：<b>未来广告公司 = AI 调度 × 超级个体</b> —— AI 负责持续扫描、结构化与初筛，人负责判断、取舍与关系；
+      每条流水线都从「人找事」变成「事找人」，经验在流程中自动沉淀为公司资产。
+    </div>
+
     <div class="grid g4">
-      <div class="kpi"><div class="label">今日消耗（四端口合计）</div><div class="val">¥16,650,000</div><div class="delta up">▲ +12.3% vs 昨日</div><div class="extra">腾讯 ¥1,042万 · 巨量 ¥386万 · 快手 ¥151万 · 小红书 ¥86万</div></div>
-      <div class="kpi"><div class="label">今日 GMV</div><div class="val">¥21,480,000</div><div class="delta up">▲ +9.7%</div><div class="extra">今日综合 ROI 1.29</div></div>
-      <div class="kpi"><div class="label">2026 Q3 累计消耗</div><div class="val">¥6.82 亿</div><div class="delta down">季度日均 ¥1,482.6 万</div><div class="extra">已覆盖 46 天 · 数据完整度 46/47</div></div>
-      <div class="kpi warn"><div class="label">待处理事项</div><div class="val">3 项预警</div><div class="delta" style="color:var(--amber)">素材待审 2,246 条 · 高风险 217 条</div><div class="extra">风控 1 条高危 · 余额 1 主体预警</div></div>
+      <div class="kpi"><div class="label">今日消耗（四端口合计）</div><div class="val">¥203.6 万</div><div class="delta up">▲ +8.7% vs 昨日</div><div class="extra">腾讯 ¥118.4万 · 巨量 ¥52.3万 · 快手 ¥21.2万 · 小红书 ¥11.7万</div></div>
+      <div class="kpi"><div class="label">今日 GMV / 综合 ROI</div><div class="val">¥268.7 万</div><div class="delta up">▲ +9.7% · ROI 1.32</div><div class="extra">本月综合毛利率 18.2%（▼ 0.8pt，垫资成本上升）</div></div>
+      <div class="kpi"><div class="label">2026 Q3 累计消耗 / 返点预估</div><div class="val">¥1.49 亿</div><div class="delta down">季度日均 ¥165 万 · 返点 ¥1,013.5 万</div><div class="extra">框架目标完成度 70.5% · 数据完整度 90/91</div></div>
+      <div class="kpi warn"><div class="label">垫资占用 / 现金安全线</div><div class="val">¥96 万</div><div class="delta" style="color:var(--amber)">现金余额 ¥385 万 · 红线 ¥150 万</div><div class="extra">双11 预热加投，预计 10 月中触及红线 · 另有 3 项预警待处理</div></div>
     </div>
 
     <div class="card">
-      <h3>AI 今日建议</h3>
-      <div class="hint">由 Agent 助手跨媒介、运营、素材三个域汇总生成 · 2026-09-22</div>
-      <div class="feed"><div class="ico r">!</div><div><div class="t">风控高危：运营丙名下账户近 7 日 4 次"政治元素"拒审</div><div class="d">建议今日内复核其名下全部在投素材（37 条），并暂停批量复制策略</div></div></div>
-      <div class="feed"><div class="ico a">!</div><div><div class="t">运营异常：运营甲 / 丙 / 丁 触发红标规则</div><div class="d">今日 10:00 后 ROI&lt;1.3 或消耗&lt;1000 元。其中运营甲 ROI 0.99，接近盈亏线</div></div></div>
-      <div class="feed"><div class="ico b">i</div><div><div class="t">人才建议：新人甲入职 1.5 个月无产出增长</div><div class="d">消耗仅为同批新人乙的 13%，建议将其 39 个账户改配给新人乙或运营丙，预计提升整体产出 5–10%</div></div></div>
-      <div class="feed"><div class="ico a">!</div><div><div class="t">素材队列压力：待人工审批 2,246 条，AI 预审标记高风险 217 条</div><div class="d">建议优先处理 AI 标记的 96 条"需人工重点复核"，预计可将队列压缩 40%</div></div></div>
-      <div class="feed"><div class="ico g">✓</div><div><div class="t">返点进度：Q3 综合返点预估 ¥4,663 万，腾讯端口目标完成度 71.2%</div><div class="d">进度正常；快手端口 68.9%，略低于节奏，建议关注</div></div></div>
+      <h3>AI 今日建议 · 跨域汇总</h3>
+      <div class="hint">由 Agent 助手跨媒介、运营、素材、销售四个域汇总生成 · 2026-09-29</div>
+      <div class="feed"><div class="ico b">★</div><div><div class="t">政策商机：京东发布 2026 Q4 渠道代理商激励，新签约代理首季免消耗门槛</div><div class="d">站外 RTB 快手（客保外）返点封顶 8%、京腾合约封顶 11%；AI 测算 Q4 增量返点约 ¥16.3 万。媒介经营已生成签约测算与运营/销售指令，待拍板</div><div class="src">来源：京东京准通官方政策 × 媒介经营 · 政策雷达</div></div></div>
+      <div class="feed"><div class="ico r">!</div><div><div class="t">风控高危：运营丙名下账户近 7 日 4 次"政治元素"拒审</div><div class="d">建议今日内复核其名下全部在投素材（37 条），并暂停批量复制策略</div><div class="src">来源：媒介经营 · 风控巡查 × 素材中心 · AI 预审</div></div></div>
+      <div class="feed"><div class="ico a">!</div><div><div class="t">资金预警：双11 预热加投，垫资占用预计 10 月中触及 150 万红线</div><div class="d">按当前回款节奏推演，建议提前与客户协商缩短账期或评估保理成本</div><div class="src">来源：现金流日预测模型</div></div></div>
+      <div class="feed"><div class="ico a">!</div><div><div class="t">运营异常：运营甲 / 丙 / 丁 触发红标规则（10:00 后 ROI&lt;1.3 或消耗&lt;1 万元）</div><div class="d">其中运营甲 ROI 0.99，接近盈亏线</div><div class="src">来源：运营盯盘 · 红标规则</div></div></div>
+      <div class="feed"><div class="ico b">i</div><div><div class="t">商机：教育客户「学而思」Q4 预算窗口开启（窗口期 18 天）</div><div class="d">历史同期该客户 Q4 加预算概率 78%，建议本周内安排提案；另有图书出版行业线索匹配度 87 分</div><div class="src">来源：客户消耗曲线 × 行业季节性模型 × 上市公司财报监测</div></div></div>
+      <div class="feed"><div class="ico g">✓</div><div><div class="t">返点进度：Q3 综合返点预估 ¥1,013.5 万，框架目标完成度 70.5%</div><div class="d">腾讯 69.5% / 巨量 74.0% 正常；快手 68.5% 偏慢（缺口约 ¥630 万）；巨量 Q4 新政返点 +1.5pt</div><div class="src">来源：媒介经营 · 返点测算 × 政策雷达</div></div></div>
     </div>
 
-    <div class="grid g3">
-      <div class="card"><h3>媒介经营</h3><div class="hint">端口消耗 · 返点测算 · 风控巡查 · 自动充值</div><div class="kv">今日实时消耗 <b>¥1,665 万</b><br>内循环占比 <b>72.9%</b> · 近 7 日节奏 <b>低于区间均值 3.1%</b><br>风控预警 <b style="color:var(--red)">4 条</b></div><button class="btn sm" data-goto="media" style="margin-top:10px">进入媒介经营 →</button></div>
-      <div class="card"><h3>运营盯盘</h3><div class="hint">跑品看板 · 红标规则 · 员工诊断 · 人才建议</div><div class="kv">今日 ROI <b>1.2255</b> · 在跑品 <b>12</b> · 在跑账户 <b>14</b><br>红标运营 <b style="color:var(--red)">3 人</b> · 淘汰建议 <b>1 条</b></div><button class="btn sm" data-goto="ops" style="margin-top:10px">进入运营盯盘 →</button></div>
-      <div class="card"><h3>素材中心</h3><div class="hint">AI 预审 · 批量审批 · 素材诊断 · 文案生成</div><div class="kv">昨天新增 <b>2,463 条</b> · 人工通过率 <b>97.5%</b><br>AI 高风险标记 <b style="color:var(--red)">217 条</b></div><button class="btn sm" data-goto="creative" style="margin-top:10px">进入素材中心 →</button></div>
+    <div class="split">
+      <div class="card" style="margin-bottom:0">
+        <h3>客户健康度全景</h3>
+        <div class="hint">AI 综合消耗趋势、客情互动、账期与续费节点评分</div>
+        <table>
+          <thead><tr><th>客户</th><th>行业</th><th class="num">月消耗</th><th>健康度</th><th>续费风险</th><th>AI 下一步建议</th></tr></thead>
+          <tbody>
+            <tr><td>隆力奇</td><td>电商</td><td class="num">¥1,620万</td><td><span class="tag green">92</span></td><td><div class="bar"><i style="width:12%;background:var(--teal)"></i></div></td><td>Q4 承接方案 + 京腾合约年框测算</td></tr>
+            <tr><td>学而思</td><td>教育</td><td class="num">¥980万</td><td><span class="tag green">85</span></td><td><div class="bar"><i style="width:25%;background:var(--teal)"></i></div></td><td>预算窗口期 18 天，本周提案</td></tr>
+            <tr><td>骏丰金融</td><td>金融</td><td class="num">¥760万</td><td><span class="tag amber">71</span></td><td><div class="bar"><i style="width:48%;background:var(--amber)"></i></div></td><td>关注对接人变动，安排季度复盘</td></tr>
+            <tr><td>漫游网服</td><td>网服</td><td class="num">¥520万</td><td><span class="tag amber">66</span></td><td><div class="bar"><i style="width:55%;background:var(--amber)"></i></div></td><td>维持观察</td></tr>
+            <tr class="flag"><td>臻美护肤</td><td>美妆</td><td class="num">¥460万</td><td><span class="tag red">48</span></td><td><div class="bar"><i style="width:82%;background:var(--red)"></i></div></td><td>老板直管 + 7 天内拜访 + 让步预案</td></tr>
+          </tbody>
+        </table>
+        <div class="note blue" style="margin-top:12px"><b>AI 经营日报（08:00 自动生成）：</b>昨日消耗 187.4 万（今日 +8.7%，双11 预热加投开始放量）；3 个账户触发预警已派单；臻美护肤连续 2 周消耗下滑且对接人离职，建议老板直接介入客情。</div>
+      </div>
+      <div class="judge">
+        <div class="aicard"><span class="ai-tag">AI 建议</span>
+          <div class="tt">本周内拍板：是否签约京东「京营合作伙伴」</div>
+          <div class="ds" style="margin-top:4px">新签约代理首季免消耗门槛，10/1 新政生效。Q4 预估增量返点 ≈¥16.3 万；若隆力奇京腾合约年框落地，另有年度上限机会 ¥72 万。</div>
+          <div class="check">确认签约主体资质与垫资条款（京东返点季度结算，回款周期更长）</div>
+          <div class="check">批准媒介下发的账户盘点与客户清单指令（详见媒介经营）</div>
+        </div>
+        <div class="aicard"><span class="ai-tag">AI 建议</span>
+          <div class="tt">将臻美护肤列入「老板直管客户」</div>
+          <div class="ds" style="margin-top:4px">该客户贡献毛利 11%，续费风险 82%，历史记录显示高层介入后挽回率 65%。</div>
+          <div class="check">确认客户决策人档期并安排拜访</div>
+          <div class="check">是否接受客户提出的返点让步条件</div>
+        </div>
+        <div class="aicard"><span class="ai-tag">AI 建议</span>
+          <div class="tt">人才调配：新人甲名下 39 个账户改配</div>
+          <div class="ds" style="margin-top:4px">消耗仅为同批新人乙的 13%，改配新人乙或运营丙，预计提升整体产出 5–10%。</div>
+          <div class="check">面谈确认后再执行（人的判断优先于数据）</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g3" style="margin-top:16px">
+      <div class="card" style="margin-bottom:0"><h3>媒介经营 · 大脑</h3><div class="hint">政策雷达 · 业务指令 · 返点测算 · 风控巡查</div><div class="kv">今日实时消耗 <b>¥203.6 万</b><br>内循环占比 <b>73.1%</b> · 近 7 日节奏 <b>高于区间均值 6.2%</b><br>待读新政 <b style="color:var(--red)">1 条（京东 Q4）</b> · 风控预警 <b style="color:var(--red)">4 条</b></div><button class="btn sm" data-goto="media" style="margin-top:10px">进入媒介经营 →</button></div>
+      <div class="card" style="margin-bottom:0"><h3>运营盯盘</h3><div class="hint">跑品看板 · 红标规则 · 员工诊断 · 人才建议</div><div class="kv">电商引流一组今日 ROI <b>1.2255</b> · 在跑品 <b>12</b> · 在跑账户 <b>14</b><br>红标运营 <b style="color:var(--red)">3 人</b> · 淘汰建议 <b>1 条</b></div><button class="btn sm" data-goto="ops" style="margin-top:10px">进入运营盯盘 →</button></div>
+      <div class="card" style="margin-bottom:0"><h3>素材中心</h3><div class="hint">AI 预审 · 批量审批 · 素材诊断 · 文案生成</div><div class="kv">昨天新增 <b>486 条</b> · 人工通过率 <b>97.9%</b><br>AI 高风险标记 <b style="color:var(--red)">41 条</b></div><button class="btn sm" data-goto="creative" style="margin-top:10px">进入素材中心 →</button></div>
     </div>
   </section>
 
-  <!-- ============ 媒介经营 ============ -->
+  <!-- ============ 媒介经营 · 大脑 ============ -->
   <section class="page" id="page-media">
+    <div class="brain">
+      <b>媒介中台 = 公司大脑。</b>媒体政策不是"返点通知"，而是业务方向：每一条新政都被 AI 拆解为<b>运营指令</b>（账户怎么调、预算往哪走）
+      与<b>销售指令</b>（客户谈什么、方案怎么打包），经人工拍板后下发到对应工作台，执行结果回流复盘。
+    </div>
+
+    <div class="flow">
+      <div class="ft">角色跃迁：媒介</div>
+      <div class="row"><span class="lbl">现在</span><span class="fchip">政策靠群消息</span><span class="arrow">→</span><span class="fchip">返点手工测算</span><span class="arrow">→</span><span class="fchip">排期靠 Excel 拉</span><span class="arrow">→</span><span class="fchip">经验在个人脑子里</span></div>
+      <div class="row"><span class="lbl">未来</span><span class="fchip future">政策雷达自动抓取</span><span class="arrow">→</span><span class="fchip future">政策 → 运营/销售指令自动拆解</span><span class="arrow">→</span><span class="fchip future">返点实时测算</span><span class="arrow">→</span><span class="fchip future">策略资产自动沉淀</span></div>
+      <div class="leap">核心跃迁：媒介从「传声筒」变成「公司大脑」—— 政策变方向，方向变指令，指令沉淀为策略资产</div>
+    </div>
+
+    <div class="split">
+      <div class="card" style="margin-bottom:0">
+        <h3>AI 政策雷达 → 业务指令</h3>
+        <div class="hint">自动抓取官方公告 · AI 拆解为运营指令与销售指令 · 人工拍板后一键下发到对应工作台 · 待读新政 1 条</div>
+
+        <div class="aicard"><div class="hd"><div class="tt">京东 2026 Q4 渠道代理商激励政策发布<span class="newbadge">NEW</span></div><div class="score hi">93</div></div>
+          <div class="tags"><span class="tag blue">京东 · 京准通</span><span class="tag amber">10/1 生效</span><span class="tag teal">新签约首季免门槛</span><span class="tag gray">官方政策文件 × 2</span></div>
+          <div class="ds">基础激励：站内 RTB 固定 0.5%（门槛 ≥80 万）、站外 RTB / 站外合约固定 0.5%（门槛 ≥20 万）；任务激励按完成率分档：
+          站外 RTB <b>快手（客保外）封顶 8.0%</b>、腾讯/字节封顶 1.0%、百度/京X 封顶 3.0%；站外合约（京腾）年度 ≥200 万起、<b>封顶 11%</b>；
+          另有客户数激励（单客户消耗 ≥2,000 元计入，最高 0.5%）。我司属新签约代理（2024 年至今未合作），<b>首季无门槛限制</b>。</div>
+          <div class="cmd ops"><span class="ico-tag">→ 运营指令</span>盘点现有电商客户中可导流京东的站外账户（预估 18–22 个），10/1 前完成京准通开户与计划搭建；快手客保外客户优先，返点杠杆最高</div>
+          <div class="cmd sales"><span class="ico-tag">→ 销售指令</span>向隆力奇电商推「京腾合约年框」方案（返点档位最高 11%）；向 3 家快消 / 电商潜在客户打包"京东引流代运营"试投包（新客 ≥2,000 元即计入客户数激励）</div>
+          <div class="src-line">来源：京东《2026 年渠道代理商激励政策 · 基础激励 / 电商引流类代理》· AI 已完成要点抽取与测算（见下方测算卡）</div>
+        </div>
+
+        <div class="aicard"><div class="hd"><div class="tt">巨量引擎 Q4 消耗激励：梯度返点上调 1.5pt</div><div class="score hi">88</div></div>
+          <div class="tags"><span class="tag blue">巨量</span><span class="tag amber">有效期 21 天</span><span class="tag gray">官方公告 09-12</span></div>
+          <div class="ds">月消耗 ≥300 万部分享受上调返点，覆盖我司 4 个客户，年化增量毛利约 +21.8 万。</div>
+          <div class="cmd ops"><span class="ico-tag">→ 运营指令</span>4 个覆盖客户的月消耗冲刺计划已生成草稿，重点账户 LT-0917 优先放量</div>
+          <div class="cmd sales"><span class="ico-tag">→ 销售指令</span>框架签署前需与 2 家客户确认 Q4 预算意向，避免冲量承诺落空</div>
+        </div>
+
+        <div class="aicard"><div class="hd"><div class="tt">腾讯广告 KA 服务商激励追加</div><div class="score hi">82</div></div>
+          <div class="tags"><span class="tag blue">腾讯</span><span class="tag amber">有效期 35 天</span></div>
+          <div class="ds">新行业消耗按 110% 计入激励，教育行业直接受益（联动学而思 Q4 窗口）。</div>
+          <div class="cmd sales"><span class="ico-tag">→ 销售指令</span>学而思 Q4 提案中引用该激励口径，可增强报价空间 0.5–0.8pt</div>
+        </div>
+
+        <div class="aicard"><div class="hd"><div class="tt">磁力金牛小店自播补贴收紧</div><div class="score md">64</div></div>
+          <div class="tags"><span class="tag blue">快手</span><span class="tag amber">解读需人工确认</span></div>
+          <div class="ds">补贴口径由「自播 GMV」改为「千川联动消耗」，影响 2 个电商客户成本测算。</div>
+          <div class="cmd ops"><span class="ico-tag">→ 运营指令</span>2 个受影响客户的成本模型已标记待复核，口径确认前暂停自动加预算</div>
+        </div>
+      </div>
+
+      <div class="judge">
+        <div class="aicard"><span class="ai-tag">AI 建议</span>
+          <div class="tt">本周完成京东「京营合作伙伴」签约</div>
+          <div class="ds" style="margin-top:4px">新签约代理首季免门槛，10/1 新政生效。站外 RTB + 站内 RTB 合计预估增量返点 ≈¥16.3 万 / Q4。</div>
+          <div class="check">确认签约主体资质与垫资条款（京东返点季度结算，回款周期更长）</div>
+          <div class="check">站外合约仅可落地京东，需先与客户确认投放链路</div>
+        </div>
+        <div class="aicard"><span class="ai-tag">AI 建议</span>
+          <div class="tt">优先签署巨量 Q4 框架，腾讯框架可延后观察</div>
+          <div class="ds" style="margin-top:4px">按当前消耗结构，巨量新政确定性收益最高；腾讯激励存在口径收紧先例。</div>
+          <div class="check">与媒体确认激励是否追溯至 9 月消耗</div>
+          <div class="check">评估 Q4 冲量承诺的垫资压力（联动经营驾驶舱）</div>
+        </div>
+        <div class="aicard"><span class="ai-tag">AI Skills</span>
+          <div class="ds" style="margin-top:4px">政策解读助手 · 返点测算器 · 对账差异检测 · 框架续签倒计时 · 媒体关系笔记 · 排期冲突预警 · 政策→指令拆解器</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>京东 Q4 签约 · 增量返点测算</h3>
+      <div class="hint">依据京东官方政策文件测算 · 新签约代理首季免门槛 · 返点金额 = 返点基数 × 返点比例，季度考核季度结算（站外合约为年度）</div>
+      <table>
+        <thead><tr><th>激励类型</th><th>口径</th><th class="num">Q4 预估消耗</th><th class="num">返点比例</th><th class="num">预估返点</th><th>政策依据</th></tr></thead>
+        <tbody>
+          <tr><td>基础激励 · 站外 RTB</td><td>腾讯 / 字节 / 快手引流京东</td><td class="num">¥480 万</td><td class="num">0.5%</td><td class="num">¥2.40 万</td><td>固定返点，门槛 ≥20 万</td></tr>
+          <tr><td>任务激励 · 站外 RTB（腾讯 / 字节）</td><td>完成率按 110% 预估</td><td class="num">¥380 万</td><td class="num">0.88%</td><td class="num">¥3.34 万</td><td>完成率 ×0.8%，封顶 1.0%</td></tr>
+          <tr><td>任务激励 · 站外 RTB（快手客保外）</td><td>完成率按 110% 预估</td><td class="num">¥100 万</td><td class="num">7.15%</td><td class="num">¥7.15 万</td><td>完成率 ×6.5%，封顶 8.0%</td></tr>
+          <tr><td>客户数激励 · 站外 RTB</td><td>有效客户 ≥20 个（单客户 ≥2,000 元）</td><td class="num">¥480 万</td><td class="num">0.3%</td><td class="num">¥1.44 万</td><td>完成率 95%–120% 档</td></tr>
+          <tr><td>基础 + 任务激励 · 站内 RTB</td><td>新版快车（搜索 / 互动 / 推荐）</td><td class="num">¥150 万</td><td class="num">≈1.34%</td><td class="num">¥2.01 万</td><td>基础 0.5% + 任务 0.84%</td></tr>
+          <tr class="total"><td>合计</td><td>—</td><td class="num">—</td><td class="num">—</td><td class="num">≈ ¥16.3 万</td><td>Q4 季度结算</td></tr>
+        </tbody>
+      </table>
+      <div class="note blue" style="margin-top:12px"><b>上限机会：</b>若隆力奇电商 ¥800 万年框改签「京腾合约」（站外合约年度门槛 ≥200 万），完成率 ≥120% 时返点 9%（封顶 11%），年度增量返点可达 <b>¥72 万</b>，年度结算。</div>
+    </div>
+
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
         <div>
@@ -227,36 +402,35 @@ footer{padding:0 28px 24px;font-size:11.5px;color:var(--txt3)}
         <div style="display:flex;gap:10px;align-items:center">
           <span class="tag gray">历史 · 云端数仓</span><span class="tag blue">实时 · 媒体 API</span>
           <div class="pills"><button>昨日</button><button>本月</button><button class="active">本季度</button></div>
-          <div class="pills"><button>Q1</button><button>Q2</button><button class="active">Q3</button><button>Q4</button></div>
         </div>
       </div>
 
       <h3 style="margin-top:8px">今日实时消耗 · 四端口合计</h3>
-      <div class="hint">点击端口卡片可切换下方分类明细 · 数据更新于 2026-09-22 14:00</div>
+      <div class="hint">数据更新于 2026-09-29 14:00</div>
       <div class="grid g4">
-        <div class="kpi hl"><div class="label">今日实时消耗 · 合计</div><div class="val">¥16,650,000</div><div class="delta">▲ 高于季度日均 12.3%</div><div class="extra">2,816 个在投账户</div></div>
-        <div class="kpi"><div class="label">腾讯广告</div><div class="val">¥10,420,000</div><div class="delta up">▲ +8.4%</div><div class="extra">1,073 个账户 · 内循环为主</div></div>
-        <div class="kpi"><div class="label">巨量引擎</div><div class="val">¥3,860,000</div><div class="delta up">▲ +15.2%</div><div class="extra">892 个账户</div></div>
-        <div class="kpi"><div class="label">快手磁力 / 小红书聚光</div><div class="val">¥2,370,000</div><div class="delta down">▼ -3.1%</div><div class="extra">851 个账户</div></div>
+        <div class="kpi hl"><div class="label">今日实时消耗 · 合计</div><div class="val">¥203.6 万</div><div class="delta">▲ 高于季度日均 23.4%</div><div class="extra">326 个在投账户</div></div>
+        <div class="kpi"><div class="label">腾讯广告</div><div class="val">¥118.4 万</div><div class="delta up">▲ +8.4%</div><div class="extra">142 个账户 · 内循环为主</div></div>
+        <div class="kpi"><div class="label">巨量引擎</div><div class="val">¥52.3 万</div><div class="delta up">▲ +15.2%</div><div class="extra">96 个账户</div></div>
+        <div class="kpi"><div class="label">快手磁力 / 小红书聚光</div><div class="val">¥32.9 万</div><div class="delta down">▼ -3.1%</div><div class="extra">88 个账户</div></div>
       </div>
     </div>
 
     <div class="card">
       <h3>季度累计 · 端口拆分与内外循环分类</h3>
-      <div class="hint">内外循环按腾讯端口实际链路消耗占比拆分</div>
+      <div class="hint">内外循环按腾讯端口实际链路消耗占比拆分（仅消耗口径）</div>
       <div class="grid g5" style="margin-bottom:14px">
-        <div class="kpi"><div class="label">季度累计消耗</div><div class="val">¥6.82 亿</div><div class="extra">已覆盖 46 天</div></div>
-        <div class="kpi"><div class="label">腾讯广告</div><div class="val">¥4.27 亿</div><div class="extra">62.6% · 4,318 账户</div></div>
-        <div class="kpi"><div class="label">巨量引擎</div><div class="val">¥1.58 亿</div><div class="extra">23.2% · 2,940 账户</div></div>
-        <div class="kpi"><div class="label">快手磁力</div><div class="val">¥0.62 亿</div><div class="extra">9.1% · 1,208 账户</div></div>
-        <div class="kpi"><div class="label">小红书聚光</div><div class="val">¥0.35 亿</div><div class="extra">5.1% · 412 账户</div></div>
+        <div class="kpi"><div class="label">季度累计消耗</div><div class="val">¥1.49 亿</div><div class="extra">已覆盖 90 天 · 日均 ¥165 万</div></div>
+        <div class="kpi"><div class="label">腾讯广告</div><div class="val">¥9,040 万</div><div class="extra">60.9% · 142 账户</div></div>
+        <div class="kpi"><div class="label">巨量引擎</div><div class="val">¥3,700 万</div><div class="extra">24.9% · 96 账户</div></div>
+        <div class="kpi"><div class="label">快手磁力</div><div class="val">¥1,370 万</div><div class="extra">9.2% · 56 账户</div></div>
+        <div class="kpi"><div class="label">小红书聚光</div><div class="val">¥740 万</div><div class="extra">5.0% · 32 账户</div></div>
       </div>
       <div class="grid g5">
-        <div class="kpi"><div class="label">内循环</div><div class="val">72.9%</div><div class="extra">¥3.11 亿 · 1,314 账户</div></div>
-        <div class="kpi"><div class="label">外循环 · CID</div><div class="val">15.9%</div><div class="extra">¥0.68 亿 · 1,457 账户</div></div>
-        <div class="kpi"><div class="label">外循环 · 小程序</div><div class="val">7.1%</div><div class="extra">¥0.30 亿 · 126 账户</div></div>
-        <div class="kpi"><div class="label">外循环 · 其他</div><div class="val">2.8%</div><div class="extra">¥0.12 亿 · 107 账户</div></div>
-        <div class="kpi"><div class="label">品宣</div><div class="val">0.4%</div><div class="extra">¥0.02 亿 · 28 账户</div></div>
+        <div class="kpi"><div class="label">内循环</div><div class="val">73.1%</div><div class="extra">¥10,856 万</div></div>
+        <div class="kpi"><div class="label">外循环 · CID</div><div class="val">15.9%</div><div class="extra">¥2,361 万</div></div>
+        <div class="kpi"><div class="label">外循环 · 小程序</div><div class="val">7.1%</div><div class="extra">¥1,054 万</div></div>
+        <div class="kpi"><div class="label">外循环 · 其他</div><div class="val">3.5%</div><div class="extra">¥520 万</div></div>
+        <div class="kpi"><div class="label">品宣</div><div class="val">0.4%</div><div class="extra">¥59 万</div></div>
       </div>
     </div>
 
@@ -270,13 +444,13 @@ footer{padding:0 28px 24px;font-size:11.5px;color:var(--txt3)}
         <h3>节奏判断</h3>
         <div class="hint">管理层需要优先看到的结论</div>
         <div class="kv">
-          近 7 日趋势：<b style="color:var(--amber)">低于区间均值 3.1%</b><br>
-          <span style="color:var(--txt3)">近期节奏低于历史区间日均</span><br>
-          区间最高日耗：<b>¥2,156 万</b>（08-09，较区间日均高 33.1%）<br>
-          工作日日均：<b>¥1,586 万</b> · 周末日均：<b>¥1,204 万</b><br>
-          数据完整度：<b>46 / 47 天</b>（缺 1 天）
+          近 7 日趋势：<b style="color:var(--green)">高于区间均值 6.2%</b><br>
+          <span style="color:var(--txt3)">双11 预热加投，节奏显著走强</span><br>
+          区间最高日耗：<b>¥227 万</b>（09-24，较区间日均高 37.6%）<br>
+          工作日日均：<b>¥178 万</b> · 周末日均：<b>¥136 万</b><br>
+          数据完整度：<b>90 / 91 天</b>（缺 1 天）
         </div>
-        <div class="note blue" style="margin-top:14px">建议：近 7 日节奏走低主因是运营甲、丙名下账户收缩。若维持当前节奏，Q3 将低于框架目标约 2.4%。</div>
+        <div class="note blue" style="margin-top:14px">收官预判：Q3 预计以框架目标 71% 左右收官，快手端口缺口约 ¥630 万。双11 预算窗口已开启，建议 10 月上旬锁定 Q4 框架并完成京东代理签约。</div>
       </div>
     </div>
 
@@ -284,13 +458,13 @@ footer{padding:0 28px 24px;font-size:11.5px;color:var(--txt3)}
       <h3>返点经营测算</h3>
       <div class="hint">返点率按 2026 年度媒体框架协议；目标完成度 = 累计消耗 / 季度框架目标</div>
       <table>
-        <thead><tr><th>媒体端口</th><th class="num">季度累计消耗</th><th class="num">返点率</th><th class="num">返点预估</th><th class="num">框架目标</th><th class="num">完成度</th><th>状态</th></tr></thead>
+        <thead><tr><th>媒体端口</th><th class="num">季度累计消耗</th><th class="num">基准返点</th><th class="num">新政返点</th><th class="num">返点预估</th><th class="num">框架目标</th><th class="num">完成度</th><th>状态</th></tr></thead>
         <tbody>
-          <tr><td>腾讯广告</td><td class="num">¥4.27 亿</td><td class="num">6.8%</td><td class="num">¥2,903.6 万</td><td class="num">¥6.0 亿</td><td class="num">71.2%</td><td><span class="tag green">正常</span></td></tr>
-          <tr><td>巨量引擎</td><td class="num">¥1.58 亿</td><td class="num">6.2%</td><td class="num">¥979.6 万</td><td class="num">¥2.4 亿</td><td class="num">65.8%</td><td><span class="tag green">正常</span></td></tr>
-          <tr><td>快手磁力</td><td class="num">¥0.62 亿</td><td class="num">7.5%</td><td class="num">¥465.0 万</td><td class="num">¥0.9 亿</td><td class="num">68.9%</td><td><span class="tag amber">偏慢</span></td></tr>
-          <tr><td>小红书聚光</td><td class="num">¥0.35 亿</td><td class="num">9.0%</td><td class="num">¥315.0 万</td><td class="num">¥0.5 亿</td><td class="num">70.0%</td><td><span class="tag green">正常</span></td></tr>
-          <tr class="total"><td>合计</td><td class="num">¥6.82 亿</td><td class="num">综合 6.8%</td><td class="num">¥4,663.2 万</td><td class="num">¥9.8 亿</td><td class="num">69.6%</td><td>—</td></tr>
+          <tr><td>腾讯广告</td><td class="num">¥9,040 万</td><td class="num">6.8%</td><td class="num">6.8%</td><td class="num">¥614.7 万</td><td class="num">¥1.30 亿</td><td class="num">69.5%</td><td><span class="tag green">正常</span></td></tr>
+          <tr><td>巨量引擎</td><td class="num">¥3,700 万</td><td class="num">6.2%</td><td class="num">7.7% <span class="tag teal">Q4 新政</span></td><td class="num">¥229.4 万</td><td class="num">¥5,000 万</td><td class="num">74.0%</td><td><span class="tag green">正常</span></td></tr>
+          <tr><td>快手磁力</td><td class="num">¥1,370 万</td><td class="num">7.5%</td><td class="num">7.5%</td><td class="num">¥102.8 万</td><td class="num">¥2,000 万</td><td class="num">68.5%</td><td><span class="tag amber">偏慢</span></td></tr>
+          <tr><td>小红书聚光</td><td class="num">¥740 万</td><td class="num">9.0%</td><td class="num">9.0%</td><td class="num">¥66.6 万</td><td class="num">¥1,050 万</td><td class="num">70.5%</td><td><span class="tag green">正常</span></td></tr>
+          <tr class="total"><td>合计</td><td class="num">¥1.49 亿</td><td class="num">综合 6.8%</td><td class="num">—</td><td class="num">¥1,013.5 万</td><td class="num">¥2.11 亿</td><td class="num">70.5%</td><td>—</td></tr>
         </tbody>
       </table>
     </div>
@@ -300,7 +474,7 @@ footer{padding:0 28px 24px;font-size:11.5px;color:var(--txt3)}
         <h3>风控巡查</h3>
         <div class="hint">每日自动巡检 · 按风险等级排序</div>
         <div class="risk-item"><span class="tag red lv">高危</span><div><div class="t">素材违规预警 · 运营丙</div><div class="d">名下账户近 7 日 4 次"政治元素"拒审。建议立即复核该运营名下全部 37 条在投素材，暂停批量复制策略。</div></div></div>
-        <div class="risk-item"><span class="tag amber lv">中危</span><div><div class="t">账户异常 · TX-88421（客户：六神）</div><div class="d">今日消耗骤降 -68%，疑似计划暂停或预算触顶，已推送运营负责人确认。</div></div></div>
+        <div class="risk-item"><span class="tag amber lv">中危</span><div><div class="t">账户异常 · TX-88421（客户：上海家化）</div><div class="d">今日消耗骤降 -68%，疑似计划暂停或预算触顶，已推送运营负责人确认。</div></div></div>
         <div class="risk-item"><span class="tag amber lv">中危</span><div><div class="t">预算异常 · 六神花露水</div><div class="d">今日消耗超日预算 12%，系统已自动限流并记录。</div></div></div>
         <div class="risk-item"><span class="tag gray lv">低危</span><div><div class="t">余额不足 · 主体 C（快手）</div><div class="d">预计 1.1 天后余额耗尽，已发起自动充值申请。</div></div></div>
       </div>
@@ -310,25 +484,32 @@ footer{padding:0 28px 24px;font-size:11.5px;color:var(--txt3)}
         <table>
           <thead><tr><th>主体</th><th class="num">余额</th><th class="num">预计可投</th><th>状态</th></tr></thead>
           <tbody>
-            <tr><td>主体 A（腾讯 · 内循环）</td><td class="num">¥286.5 万</td><td class="num">4.1 天</td><td><span class="tag green">正常</span></td></tr>
-            <tr class="flag"><td>主体 B（巨量）</td><td class="num">¥42.3 万</td><td class="num">0.9 天</td><td><span class="tag red">已自动充值 ¥50 万 · 09:30</span></td></tr>
-            <tr><td>主体 C（快手）</td><td class="num">¥18.6 万</td><td class="num">1.1 天</td><td><span class="tag amber">预警 · 充值申请中</span></td></tr>
-            <tr><td>主体 D（小红书）</td><td class="num">¥56.0 万</td><td class="num">5.8 天</td><td><span class="tag green">正常</span></td></tr>
+            <tr><td>主体 A（腾讯 · 内循环）</td><td class="num">¥68.5 万</td><td class="num">4.1 天</td><td><span class="tag green">正常</span></td></tr>
+            <tr class="flag"><td>主体 B（巨量）</td><td class="num">¥12.3 万</td><td class="num">0.9 天</td><td><span class="tag red">已自动充值 ¥15 万 · 09:30</span></td></tr>
+            <tr><td>主体 C（快手）</td><td class="num">¥5.6 万</td><td class="num">1.1 天</td><td><span class="tag amber">预警 · 充值申请中</span></td></tr>
+            <tr><td>主体 D（小红书）</td><td class="num">¥16.0 万</td><td class="num">5.8 天</td><td><span class="tag green">正常</span></td></tr>
           </tbody>
         </table>
-        <div class="note" style="margin-top:12px">本月自动充值已执行 18 次，合计 ¥620 万，零人工干预，无一次断投。</div>
+        <div class="note" style="margin-top:12px">本月自动充值已执行 18 次，合计 ¥186 万，零人工干预，无一次断投。</div>
       </div>
     </div>
   </section>
 
   <!-- ============ 运营盯盘 ============ -->
   <section class="page" id="page-ops">
+    <div class="flow">
+      <div class="ft">角色跃迁：投放运营</div>
+      <div class="row"><span class="lbl">现在</span><span class="fchip">人工盯账户</span><span class="arrow">→</span><span class="fchip">手动导数做日报</span><span class="arrow">→</span><span class="fchip">调预算凭经验</span><span class="arrow">→</span><span class="fchip">异常发现滞后半天</span></div>
+      <div class="row"><span class="lbl">未来</span><span class="fchip future">AI 7×24 扫描全账户</span><span class="arrow">→</span><span class="fchip future">异常自动分级派单</span><span class="arrow">→</span><span class="fchip future">调优建议带依据</span><span class="arrow">→</span><span class="fchip future">日报话术一键生成</span></div>
+      <div class="leap">核心跃迁：优化师从「盯盘手」变成「策略裁判」</div>
+    </div>
+
     <div class="card">
-      <h3>跑品 · 动态数据看板</h3>
-      <div class="hint">每 2 小时自动同步 · 页面每 2 分钟自动刷新 · 数据更新于 2026-09-22 14:21 · 历史快照 32 个</div>
+      <h3>跑品 · 动态数据看板 <span class="tag blue" style="vertical-align:2px">电商引流一组</span></h3>
+      <div class="hint">小组口径：4 名运营 · 14 个在跑账户，日消耗约占全公司 2.5% · 每 2 小时自动同步 · 页面每 2 分钟自动刷新 · 数据更新于 2026-09-29 14:21 · 历史快照 32 个</div>
       <div class="grid g5">
-        <div class="kpi"><div class="label">今日消耗（元）</div><div class="val">5,052.56</div><div class="delta up">▲ +751.05</div></div>
-        <div class="kpi"><div class="label">今日 GMV（元）</div><div class="val">6,192.10</div><div class="delta up">▲ +877.10</div></div>
+        <div class="kpi"><div class="label">今日消耗（元）</div><div class="val">50,525.60</div><div class="delta up">较昨日同时段 ▲ +7,510.50</div></div>
+        <div class="kpi"><div class="label">今日 GMV（元）</div><div class="val">61,921.00</div><div class="delta up">▲ +8,771.00</div></div>
         <div class="kpi"><div class="label">今日 ROI</div><div class="val">1.2255</div><div class="delta down">▼ -0.01</div></div>
         <div class="kpi"><div class="label">今日在跑品</div><div class="val">12</div><div class="delta up">▲ +1.00</div></div>
         <div class="kpi"><div class="label">今日在跑账户</div><div class="val">14</div><div class="delta up">▲ +1.00</div></div>
@@ -337,7 +518,7 @@ footer{padding:0 28px 24px;font-size:11.5px;color:var(--txt3)}
 
     <div class="card">
       <h3>总消耗趋势（今日分 2 小时段）</h3>
-      <div class="hint">今日累计消耗 5,052.56 元 · 峰值 1,340.86 元 · 当前已覆盖 12 个 2 小时段（未覆盖段显示为 0）</div>
+      <div class="hint">今日累计消耗 50,525.60 元 · 峰值 12,900 元（08-10 时段）· 当前已覆盖 9 个 2 小时段（未覆盖段显示为 0）</div>
       <div style="height:240px"><canvas id="chartOps"></canvas></div>
     </div>
 
@@ -350,64 +531,105 @@ footer{padding:0 28px 24px;font-size:11.5px;color:var(--txt3)}
         <thead><tr><th>运营</th><th class="num">消耗</th><th class="num">GMV</th><th class="num">ROI</th><th class="num">下单数</th><th class="num">下单单价</th><th>状态</th></tr></thead>
         <tbody></tbody>
       </table>
-      <div class="note red" style="margin-top:12px">红标规则：北京时间 10:00 之后，若某运营「当日」ROI &lt; 1.3 或 消耗 &lt; 1000 元，则其当日整行标红，便于快速定位异常运营。</div>
+      <div class="note red" style="margin-top:12px">红标规则：北京时间 10:00 之后，若某运营「当日」ROI &lt; 1.3 或 消耗 &lt; 10,000 元，则其当日整行标红，便于快速定位异常运营。</div>
     </div>
 
-    <div class="grid g2">
-      <div class="card" style="margin-bottom:0">
-        <h3>员工诊断 · 运营丙</h3>
-        <div class="hint">Agent 基于近 30 日操作日志自动生成 · 每 24 小时更新</div>
-        <table>
-          <thead><tr><th>维度</th><th>评价</th><th>说明</th></tr></thead>
-          <tbody>
-            <tr><td>素材通过率</td><td class="stars">★★★<span class="off">★★</span></td><td>86.9% 整体不错，但个别账户低至 53%</td></tr>
-            <tr><td>操作量</td><td class="stars">★★★★<span class="off">★</span></td><td>日均 65.6 次，体量适中</td></tr>
-            <tr><td>操作质量</td><td class="stars">★★<span class="off">★★★</span></td><td>80% 是修改，反复调整效率低</td></tr>
-            <tr><td>账户管理</td><td class="stars">★★<span class="off">★★★</span></td><td>15% 闲置账户，突击式工作</td></tr>
-            <tr><td>违规风险</td><td class="stars">★★<span class="off">★★★</span></td><td>4 次政治元素拒审需警惕</td></tr>
-            <tr><td>自主性</td><td class="stars">★★<span class="off">★★★</span></td><td>26% 人工操作，62% 依赖自动化工具</td></tr>
-          </tbody>
-        </table>
-        <div class="note" style="margin-top:12px"><b>核心问题：</b>该运营的工作模式偏向"批量复制 + 大量修改"，缺乏从源头上把控素材质量和账户结构的习惯。<b>政治元素拒审是一个危险信号。</b></div>
-      </div>
-      <div class="card" style="margin-bottom:0">
-        <h3>人才建议 · <span style="color:var(--red)">淘汰建议：新人甲</span></h3>
-        <div class="hint">与同批入职新人横向对比 · 近 30 日</div>
-        <table>
-          <thead><tr><th>维度</th><th class="num">新人甲</th><th class="num">新人乙（同批）</th><th class="num">差距</th></tr></thead>
-          <tbody>
-            <tr><td>消耗</td><td class="num">¥14,916</td><td class="num">¥113,184</td><td class="num">7.6 倍</td></tr>
-            <tr><td>ROI</td><td class="num">1.00</td><td class="num">1.31</td><td class="num">-31%</td></tr>
-            <tr><td>出单</td><td class="num">267 单</td><td class="num">3,306 单</td><td class="num">12.4 倍</td></tr>
-            <tr><td>户均消耗</td><td class="num">¥466</td><td class="num">¥2,461</td><td class="num">5.3 倍</td></tr>
-          </tbody>
-        </table>
-        <div class="note" style="margin-top:12px;line-height:1.8">
-          <b>核心理由：</b><br>
-          1. 消耗最低 — 仅为倒数第二的 29%，第一名的 4%<br>
-          2. ROI = 1.00 — 接近盈亏平衡线，广告投入换来零利润<br>
-          3. 产出效率极低 — 32 个活跃账户，户均消耗 ¥466，说明大量"走过场式"运营<br>
-          4. 入职 1.5 个月无增长 — 仍在消耗资源但无产出趋势
+    <div class="card">
+      <h3>AI 预警流 · 重点账户诊断台（全公司口径）</h3>
+      <div class="hint">AI 7×24 扫描 326 个在投账户 · 24h 内 12 条预警，3 条红色需 2h 内处理 · 今日 AI 自动执行调优 46 次，人工复核通过率 93%</div>
+      <table>
+        <thead><tr><th>账户</th><th>行业</th><th class="num">日消耗</th><th class="num">成本偏差</th><th>诊断分</th><th>AI 建议动作</th></tr></thead>
+        <tbody>
+          <tr class="flag"><td>HX-2331</td><td>金融</td><td class="num">¥8.2万</td><td class="num" style="color:var(--red)">+37%</td><td><span class="tag red">28</span></td><td>降预算 20% + 换素材（主因 CPM +22%，次因素材 CTR 连降 2 日）</td></tr>
+          <tr><td>LT-0917</td><td>电商</td><td class="num">¥15.6万</td><td class="num" style="color:var(--green)">-8%</td><td><span class="tag green">90</span></td><td>预算上调 15%，复制计划扩量；已列入京东站外引流盘点清单（素材储备仅够 2.3 天，已联动素材中心排产）</td></tr>
+          <tr><td>QH-投放3</td><td>教育</td><td class="num">¥6.4万</td><td class="num" style="color:var(--green)">-3%</td><td><span class="tag green">84</span></td><td>开学季第 3 周起量概率 81%，提前 3 天加预算 30%</td></tr>
+          <tr><td>ZM-美妆1</td><td>美妆</td><td class="num">¥4.1万</td><td class="num" style="color:var(--red)">+19%</td><td><span class="tag amber">61</span></td><td>定向过窄，建议放开 2 个人群包</td></tr>
+          <tr><td>YM-网服2</td><td>网服</td><td class="num">¥9.8万</td><td class="num">±2%</td><td><span class="tag green">78</span></td><td>维持观察</td></tr>
+        </tbody>
+      </table>
+      <div class="note" style="margin-top:12px"><b>AI 优化日志（今日）：</b>自动执行 46 次：预算微调 31 · 暂停亏损计划 9 · 时段开关 6；被人工否决的 3 次均已记录否决理由并回流模型。</div>
+    </div>
+
+    <div class="split">
+      <div class="grid g2" style="margin-bottom:0">
+        <div class="card" style="margin-bottom:0">
+          <h3>员工诊断 · 运营丙</h3>
+          <div class="hint">Agent 基于近 30 日操作日志自动生成 · 每 24 小时更新</div>
+          <table>
+            <thead><tr><th>维度</th><th>评价</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>素材通过率</td><td class="stars">★★★<span class="off">★★</span></td><td>86.9% 整体不错，但个别账户低至 53%</td></tr>
+              <tr><td>操作量</td><td class="stars">★★★★<span class="off">★</span></td><td>日均 65.6 次，体量适中</td></tr>
+              <tr><td>操作质量</td><td class="stars">★★<span class="off">★★★</span></td><td>80% 是修改，反复调整效率低</td></tr>
+              <tr><td>账户管理</td><td class="stars">★★<span class="off">★★★</span></td><td>15% 闲置账户，突击式工作</td></tr>
+              <tr><td>违规风险</td><td class="stars">★★<span class="off">★★★</span></td><td>4 次政治元素拒审需警惕</td></tr>
+              <tr><td>自主性</td><td class="stars">★★<span class="off">★★★</span></td><td>26% 人工操作，62% 依赖自动化工具</td></tr>
+            </tbody>
+          </table>
+          <div class="note" style="margin-top:12px"><b>核心问题：</b>该运营的工作模式偏向"批量复制 + 大量修改"，缺乏从源头上把控素材质量和账户结构的习惯。<b>政治元素拒审是一个危险信号。</b></div>
         </div>
-        <div class="note blue" style="margin-top:10px"><b>建议：</b>将其名下 39 个账户分配给新人乙或运营丙，预计可提升 5–10% 整体产出。</div>
+        <div class="card" style="margin-bottom:0">
+          <h3>人才建议 · <span style="color:var(--red)">淘汰建议：新人甲</span></h3>
+          <div class="hint">与同批入职新人横向对比 · 近 30 日</div>
+          <table>
+            <thead><tr><th>维度</th><th class="num">新人甲</th><th class="num">新人乙（同批）</th><th class="num">差距</th></tr></thead>
+            <tbody>
+              <tr><td>消耗</td><td class="num">¥14,916</td><td class="num">¥113,184</td><td class="num">7.6 倍</td></tr>
+              <tr><td>ROI</td><td class="num">1.00</td><td class="num">1.31</td><td class="num">-31%</td></tr>
+              <tr><td>出单</td><td class="num">267 单</td><td class="num">3,306 单</td><td class="num">12.4 倍</td></tr>
+              <tr><td>户均消耗</td><td class="num">¥466</td><td class="num">¥2,461</td><td class="num">5.3 倍</td></tr>
+            </tbody>
+          </table>
+          <div class="note" style="margin-top:12px;line-height:1.8">
+            <b>核心理由：</b>消耗仅为倒数第二的 29%；ROI = 1.00 接近盈亏线；32 个活跃账户户均消耗 ¥466，大量"走过场式"运营；入职 1.5 个月无产出增长。
+          </div>
+          <div class="note blue" style="margin-top:10px"><b>建议：</b>将其名下 39 个账户分配给新人乙或运营丙，预计可提升 5–10% 整体产出。</div>
+        </div>
+      </div>
+      <div class="judge">
+        <div class="aicard"><span class="ai-tag">媒介指令 · 来自政策雷达</span>
+          <div class="tt">盘点可导流京东的站外账户（10/1 前完成）</div>
+          <div class="ds" style="margin-top:4px">京东 Q4 站外 RTB 激励生效，新签约首季免门槛；预计 18–22 个存量电商账户可计入任务完成率，快手客保外客户返点杠杆最高（封顶 8%）。</div>
+          <div class="check">与媒介确认京准通开户主体与账户归属</div>
+          <div class="check">筛选单客户消耗 ≥2,000 元的有效客户（计入客户数激励）</div>
+        </div>
+        <div class="aicard"><span class="ai-tag">AI 建议</span>
+          <div class="tt">HX-2331 预算转移方案</div>
+          <div class="ds" style="margin-top:4px">建议将 20% 预算转移至 LT-0917（同类人群、成本更低）。</div>
+          <div class="check">确认金融客户对预算波动的容忍度（客户协议条款）</div>
+          <div class="check">品牌安全：目标账户素材调性是否与金融客户冲突</div>
+        </div>
+        <div class="aicard"><span class="ai-tag">AI Skills</span>
+          <div class="ds" style="margin-top:4px">账户诊断 · 分行业选品 · 一键日报 · 异常归因 · 预算推演 · 竞争对手消耗监测</div>
+        </div>
+        <div class="aicard risk"><span class="ai-tag warn">原则</span>
+          <div class="ds" style="margin-top:4px">AI 只做"建议与低危自动执行"，所有影响客户预算与品牌的动作必须人工确认 —— 这是客户的信任底线。</div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- ============ 素材中心 ============ -->
   <section class="page" id="page-creative">
+    <div class="flow">
+      <div class="ft">角色跃迁：视频 / 素材团队</div>
+      <div class="row"><span class="lbl">现在</span><span class="fchip">需求靠口头派单</span><span class="arrow">→</span><span class="fchip">拆片靠感觉</span><span class="arrow">→</span><span class="fchip">爆款经验留在剪辑师脑中</span><span class="arrow">→</span><span class="fchip">迭代次数无记录</span></div>
+      <div class="row"><span class="lbl">未来</span><span class="fchip future">AI 生成任务队列</span><span class="arrow">→</span><span class="fchip future">爆款元素结构化拆解</span><span class="arrow">→</span><span class="fchip future">素材库自动打标签</span><span class="arrow">→</span><span class="fchip future">迭代轮次全程可追踪</span></div>
+      <div class="leap">核心跃迁：视频从「接单交付」变成「素材系统的运营者」</div>
+    </div>
+
     <div class="grid g4">
-      <div class="kpi"><div class="label">昨天新增素材</div><div class="val">2,463</div><div class="extra">8 个客户 · 114 个账户同步</div></div>
-      <div class="kpi warn"><div class="label">待人工审批</div><div class="val">2,246</div><div class="extra">AI 预审已完成全部初筛</div></div>
-      <div class="kpi"><div class="label">今日已审批</div><div class="val">204</div><div class="extra">人工通过 199 · 通过率 97.5%</div></div>
-      <div class="kpi bad"><div class="label">AI 标记高风险</div><div class="val">217</div><div class="extra">其中建议优先人工复核 96 条</div></div>
+      <div class="kpi"><div class="label">昨天新增素材</div><div class="val">486</div><div class="extra">8 个客户 · 42 个账户同步 · 在投素材 1,286 条</div></div>
+      <div class="kpi warn"><div class="label">待人工审批</div><div class="val">412</div><div class="extra">AI 预审已完成全部初筛</div></div>
+      <div class="kpi bad"><div class="label">AI 标记高风险</div><div class="val">41</div><div class="extra">其中建议优先人工复核 18 条</div></div>
+      <div class="kpi"><div class="label">单条平均迭代轮次</div><div class="val">14.2 轮</div><div class="extra">▲ 3.1 轮（AI 辅助后）· 最高纪录 87 轮（ROI 4.8）</div></div>
     </div>
 
     <div class="split">
       <div class="card" style="margin-bottom:0">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
           <div><h3>昨天新增 · 待人工审批</h3><div class="hint" style="margin-bottom:0">AI 预审按拒审风险预排序，高风险置顶 · 支持批量操作</div></div>
-          <div style="display:flex;gap:8px"><button class="btn sm">批量通过</button><button class="btn sm">批量打回</button><button class="btn sm primary">全选 AI 通过项（1,872）</button></div>
+          <div style="display:flex;gap:8px"><button class="btn sm">批量通过</button><button class="btn sm">批量打回</button><button class="btn sm primary">全选 AI 通过项（356）</button></div>
         </div>
         <table>
           <thead><tr><th></th><th>创意 / 素材</th><th>客户</th><th>归属</th><th>AI 预审</th><th>审核状态</th></tr></thead>
@@ -436,7 +658,22 @@ footer{padding:0 28px 24px;font-size:11.5px;color:var(--txt3)}
       </div>
     </div>
 
-    <div class="grid g2" style="margin-top:16px">
+    <div class="card">
+      <h3>素材生命周期看板</h3>
+      <div class="hint">迭代轮次全程可追踪 · AI 生产队列今日：脚本生成 28 · 数字人初剪 12 · 混剪变体 40 · 待人工精修 15（AI 生成占比 38%，脚本初稿 70% 由 AI 产出）</div>
+      <table>
+        <thead><tr><th>素材</th><th>客户 / 行业</th><th>迭代</th><th>状态</th><th class="num">ROI</th><th>下一步</th></tr></thead>
+        <tbody>
+          <tr><td>SC-0912-A</td><td>隆力奇 / 电商</td><td>第 21 轮</td><td><span class="tag green">放量中</span></td><td class="num">3.6</td><td>复制框架扩 3 条变体</td></tr>
+          <tr><td>SC-0908-C</td><td>学而思 / 教育</td><td>第 9 轮</td><td><span class="tag blue">测试中</span></td><td class="num">2.1</td><td>等 48h 数据再迭代</td></tr>
+          <tr><td>SC-0831-B</td><td>骏丰 / 金融</td><td>第 87 轮</td><td><span class="tag green">类目第一</span></td><td class="num">4.8</td><td>元素已入库，防复制；建议专题复盘沉淀 SOP</td></tr>
+          <tr><td>SC-0901-D</td><td>臻美 / 美妆</td><td>第 6 轮</td><td><span class="tag amber">衰减期</span></td><td class="num">1.4</td><td>更换钩子，框架保留</td></tr>
+          <tr><td>SC-0915-A</td><td>漫游 / 网服</td><td>第 2 轮</td><td><span class="tag blue">冷启动</span></td><td class="num">—</td><td>AI 生成 5 变体批量测</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid g2">
       <div class="card" style="margin-bottom:0">
         <h3>AI 素材诊断 · 本周 TOP5 跑量视频特征拆解</h3>
         <div class="hint">基于视频理解能力自动拆解（演示：六神 · 驱蚊场景）</div>
@@ -446,6 +683,7 @@ footer{padding:0 28px 24px;font-size:11.5px;color:var(--txt3)}
           高消耗素材共性：<b>真人出镜 + 口播语速快 + 字幕高亮关键词</b><br>
           共性短板：<b>第 8–12 秒流失率最高（-42%），卖点重复</b>
         </div>
+        <div class="note blue" style="margin-top:12px"><b>爆款元素库新增：</b>「囤货清单」框架 —— 近 30 天 12 条 ROI&gt;4 素材共用元素已结构化：清单体开场 / 价格锚点 / 倒计时 CTA。</div>
         <button class="btn sm primary" style="margin-top:12px">生成完整诊断报告</button>
       </div>
       <div class="card" style="margin-bottom:0">
@@ -467,29 +705,140 @@ footer{padding:0 28px 24px;font-size:11.5px;color:var(--txt3)}
         </table>
       </div>
     </div>
+
+    <div class="split" style="margin-top:16px">
+      <div class="card" style="margin-bottom:0">
+        <h3>AI 素材任务流</h3>
+        <div class="hint">跨域联动：运营预警自动派单，素材产能反哺运营扩量决策</div>
+        <div class="aicard"><div class="hd"><div class="tt">HX-2331 金融素材迭代需求（联动运营预警）</div><div class="score hi">81</div></div>
+          <div class="tags"><span class="tag blue">派单</span><span class="tag gray">金融</span><span class="tag amber">T+1 交付</span></div>
+          <div class="ds">AI 已生成 3 版脚本框架（钩子 A/B/C 测试），参考同账户历史最优元素：前 3 秒疑问句 + 数据背书。</div>
+          <div class="src-line">来源：爆款元素库 · 自动匹配</div></div>
+        <div class="aicard"><div class="hd"><div class="tt">LT-0917 扩量素材告急（该账户已列入京东引流盘点）</div><div class="score md">62</div></div>
+          <div class="tags"><span class="tag amber">产能预警</span><span class="tag gray">电商</span></div>
+          <div class="ds">账户明日加预算 15%，现有储备素材仅够 2.3 天，建议优先排产；若导流京东需补拍京东链路落地素材 3 条。</div></div>
+      </div>
+      <div class="judge">
+        <div class="aicard"><span class="ai-tag">AI 建议</span>
+          <div class="tt">「87 轮素材」的框架值得做专题复盘</div>
+          <div class="ds" style="margin-top:4px">该素材 87 轮迭代路径已完整记录，可沉淀为金融类目 SOP，预计降低新素材冷启动成本 30%。</div>
+          <div class="check">安排剪辑师 + 优化师联合复盘会，人工提炼不可量化部分</div>
+          <div class="check">确认客户是否允许方法论对外复用</div>
+        </div>
+        <div class="aicard"><span class="ai-tag">AI Skills</span>
+          <div class="ds" style="margin-top:4px">脚本生成 · 爆款元素拆解 · 素材自动打标 · 竞对素材监测 · 迭代轮次追踪 · 版权风险检测 · AI 预审</div>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <!-- ============ 提案中心 ============ -->
-  <section class="page" id="page-proposal">
-    <div class="card">
+  <!-- ============ 销售与提案 ============ -->
+  <section class="page" id="page-sales">
+    <div class="flow">
+      <div class="ft">角色跃迁：销售 / 客户成功</div>
+      <div class="row"><span class="lbl">现在</span><span class="fchip">商机靠人脉介绍</span><span class="arrow">→</span><span class="fchip">提案 PPT 手工做 2 天</span><span class="arrow">→</span><span class="fchip">客情靠记忆维护</span><span class="arrow">→</span><span class="fchip">续费到期才发现风险</span></div>
+      <div class="row"><span class="lbl">未来</span><span class="fchip future">AI 扫描行业机会→线索</span><span class="arrow">→</span><span class="fchip future">提案框架一键生成</span><span class="arrow">→</span><span class="fchip future">客情节点自动提醒</span><span class="arrow">→</span><span class="fchip future">续费风险提前 60 天预警</span></div>
+      <div class="leap">核心跃迁：销售从「跑客户的人」变成「经营客户关系的人」</div>
+    </div>
+
+    <div class="grid g4">
+      <div class="kpi"><div class="label">在管客户</div><div class="val">23 家</div><div class="extra">KA 6 / 中小 17</div></div>
+      <div class="kpi"><div class="label">AI 线索池</div><div class="val">14 条</div><div class="delta up">本周新增 5 条</div><div class="extra">出版行业线索匹配度 87 分</div></div>
+      <div class="kpi"><div class="label">提案生成耗时</div><div class="val">2h</div><div class="delta down">原为 2 天，▼ 87%</div><div class="extra">人工只需改语气、加关系洞察、定报价</div></div>
+      <div class="kpi warn"><div class="label">60 天内到期客户</div><div class="val">3 家</div><div class="delta" style="color:var(--amber)">其中 1 家高风险（臻美护肤）</div><div class="extra">续费风险已提前 60 天预警</div></div>
+    </div>
+
+    <div class="split">
+      <div class="card" style="margin-bottom:0">
+        <h3>AI 商机信息流</h3>
+        <div class="hint">行业媒体监测 × 上市公司财报 × 存量客户消耗曲线 × 媒介政策雷达</div>
+        <div class="aicard"><div class="hd"><div class="tt">京东引流代运营 · 新客打包方案<span class="newbadge">NEW</span></div><div class="score hi">85</div></div>
+          <div class="tags"><span class="tag blue">政策红利</span><span class="tag gray">电商 / 快消</span><span class="tag teal">媒介指令下发</span></div>
+          <div class="ds">京东 Q4 渠道激励：新签约代理首季免门槛，站外 RTB 新客单客户消耗 ≥2,000 元即计入客户数激励（最高 0.5%）。建议向 3 家快消 / 电商潜在客户推"京东引流代运营"试投包；并向隆力奇电商推「京腾合约年框」（返点档位最高 11%）。</div>
+          <div class="src-line">来源：媒介经营 · 政策雷达（京东 Q4 新政）→ 销售指令</div></div>
+        <div class="aicard"><div class="hd"><div class="tt">图书出版行业广告预算整体迁移短视频</div><div class="score hi">87</div></div>
+          <div class="tags"><span class="tag blue">行业机会</span><span class="tag gray">教育</span><span class="tag teal">公开财报 × 3</span></div>
+          <div class="ds">3 家上市书企营销费用同比 +45%，Q4 为投放高峰，我司教育行业案例可直接复用。</div>
+          <div class="src-line">来源：上市公司财报 + 行业媒体监测</div></div>
+        <div class="aicard"><div class="hd"><div class="tt">隆力奇电商大促后预算承接方案</div><div class="score hi">83</div></div>
+          <div class="tags"><span class="tag blue">存量增购</span><span class="tag gray">电商</span></div>
+          <div class="ds">大促 ROI 3.6 超行业均值，AI 测算 Q4 日常维持投放可守住 GMV 基本盘。</div></div>
+        <div class="aicard"><div class="hd"><div class="tt">臻美护肤续费风险预警</div><div class="score lo">41</div></div>
+          <div class="tags"><span class="tag amber">风险</span><span class="tag gray">美妆</span></div>
+          <div class="ds">消耗连续 2 周下滑 + 对接人离职，建议高层 7 天内拜访（已联动经营驾驶舱列入老板直管）。</div></div>
+      </div>
+      <div class="judge">
+        <div class="aicard"><span class="ai-tag">AI 建议</span>
+          <div class="tt">本周主推：出版行业线索 × 教育案例组合；京东试投包同步发出</div>
+          <div class="ds" style="margin-top:4px">出版线索匹配度 87 分，建议由教育行业经验最深的销售牵头首访；京东试投包依托新政免门槛窗口，10/1 前发出可赶上 Q4 完整考核周期。</div>
+          <div class="check">线索是否触及竞对已签独家代理的边界</div>
+          <div class="check">京东试投包定价与垫资条款（京东返点季度结算，垫付周期更长）</div>
+        </div>
+        <div class="aicard risk"><span class="ai-tag warn">关系底线</span>
+          <div class="ds" style="margin-top:4px">AI 生成的话术只做草稿，所有涉及承诺、让步与人情的表达必须人工改写 —— 客户信任是广告公司的唯一资产。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
       <h3>AI 提案生成器</h3>
       <div class="hint">输入客户信息，自动生成投放提案大纲（行业洞察 · 素材策略 · 投放节奏 · 预算分配 · 效果预估）</div>
       <div class="form-row">
-        <div class="field"><label>客户名称</label><input value="六神（家化）"></div>
+        <div class="field"><label>客户名称</label><input value="上海家化"></div>
         <div class="field"><label>行业</label><select><option>快消 / 家清个护</option><option>美妆</option><option>食品饮料</option><option>3C 家电</option></select></div>
         <div class="field"><label>月预算（万元）</label><input value="30"></div>
         <div class="field"><label>投放目标</label><select><option>GMV / ROI</option><option>品牌曝光</option><option>线索收集</option></select></div>
       </div>
       <div class="field" style="margin-bottom:12px"><label>目标平台</label>
-        <div class="checks"><label><input type="checkbox" checked> 腾讯广告（视频号）</label><label><input type="checkbox" checked> 巨量引擎（抖音）</label><label><input type="checkbox"> 快手磁力</label><label><input type="checkbox"> 小红书聚光</label></div>
+        <div class="checks"><label><input type="checkbox" checked> 腾讯广告（视频号）</label><label><input type="checkbox" checked> 巨量引擎（抖音）</label><label><input type="checkbox"> 快手磁力</label><label><input type="checkbox"> 小红书聚光</label><label><input type="checkbox"> 京东 · 京准通（待签约）</label></div>
       </div>
-      <button class="btn primary" id="genBtn">生成提案大纲</button>
+      <button class="btn primary">生成提案大纲</button>
     </div>
 
-    <div class="split" id="proposalOut" style="display:block">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+        <div>
+          <h3>真实案例库 · 杰士邦「超凡持久三维一体」巨量引擎 CID 投放方案 <span class="tag green" style="vertical-align:2px">已交付客户 · 9/17 版</span></h3>
+          <div class="hint">来源：飞书方案文档 · AI 已结构化入库，新客提案可一键复用框架 · <a href="https://s056tvcp0j8.feishu.cn/wiki/LYdMwSBSDigeqVkUV7mcYb3rnkh" target="_blank" style="color:var(--blue)">查看原始方案 ↗</a></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="tag blue">巨量 CID → 京东</span><span class="tag teal">总预算 ¥154 万 / 56 天</span><span class="tag amber">ROI 0.85 → 1.1</span>
+        </div>
+      </div>
+      <div class="kv" style="margin-bottom:14px">
+        产品：杰士邦超凡持久三维一体安全套（10 只 / 盒 · 京东售价 ¥199，活动价 ¥179）· 落地店铺：杰士邦京东自营旗舰店 ·
+        <b style="color:var(--blue)">政策联动：CID 站外引流消耗可计入京东站外 RTB 任务（字节档，完成率 ×0.8%，封顶 1.0%）——媒介经营 · 京东新政的直接受益案例</b>
+      </div>
+      <table style="margin-bottom:14px">
+        <thead><tr><th>阶段</th><th>周期</th><th class="num">日均预算</th><th class="num">阶段预算</th><th class="num">预估 ROI</th><th>阶段重点</th></tr></thead>
+        <tbody>
+          <tr><td>冷启期（D1-D14）</td><td>14 天</td><td class="num">¥7,800</td><td class="num">¥10 万</td><td class="num">0.85–1.0</td><td>搭建过审 → 素材测试 → 优质放大 → ROI 优化，四步爬坡</td></tr>
+          <tr><td>放量期 W3-W5</td><td>21 天</td><td class="num">¥28,000</td><td class="num">¥60 万</td><td class="num">1.0–1.1</td><td>主账户稳定后加账户扩量级，新户低价拉 ROI</td></tr>
+          <tr><td>放量期 W6+（双11）</td><td>21 天</td><td class="num">¥40,000</td><td class="num">¥84 万</td><td class="num">1.0–1.1</td><td>大促冲刺，预算提升至 5 万 / 天，严密监控流量</td></tr>
+          <tr class="total"><td>合计</td><td>56 天</td><td class="num">—</td><td class="num">¥154 万</td><td class="num">全程 ≥0.85</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div class="grid g3">
+        <div>
+          <h3 style="font-size:13px">账户结构（四层计划组）</h3>
+          <div class="kv">冷启测试：500-1,000 / 条，最大转化快速出数<br>精品放大：2,000-5,000 / 条，优质素材加码<br>混剪扩量：通投，账户预算 3 万<br>大促冲刺：账户预算 5 万（双11 节点）</div>
+        </div>
+        <div>
+          <h3 style="font-size:13px">定向与出价</h3>
+          <div class="kv">男性 25-40 · 全国（除偏远）<br>兴趣：游戏 / 电竞 / 科技 / 运动 / 成人用品<br>行为：近 30 天搜索浏览安全套 / 成人用品<br>出价：冷启高于系统建议 10-20%，放量期 ROI≥1 维持</div>
+        </div>
+        <div>
+          <h3 style="font-size:13px">素材产出（实拍:数字人:混剪 = 5:2:3）</h3>
+          <div class="kv">实拍 50%：质感口播 + 微距特写（核心跑量）<br>数字人 20%：数码测评人设，批量产出<br>混剪 30%：跑量素材二次剪辑，延长生命周期</div>
+        </div>
+      </div>
+      <div class="note blue" style="margin-top:12px"><b>复用要点（AI 提炼）：</b>① 四步冷启爬坡法（搭建→测试→放大→ROI 优化）适用于所有京东链路 CID 新客；② 人群三层漏斗（核心 25-35 / 潜力 18-24 / 高价值复购 35-45）+ 排除已购抢竞品人群；③ 视觉走"电竞科技感 + 数码测评"路线规避品类合规风险。已沉淀为提案模板「CID-京东链路-标准版」。</div>
+    </div>
+
+    <div class="split">
       <div class="card" style="margin-bottom:0">
-        <h3>提案大纲 · 六神花露水视频号投放方案（示例）</h3>
-        <div class="hint">AI 生成 · 2026-09-22 · 引用行业数据与素材中心洞察</div>
+        <h3>提案大纲 · 上海家化 · 六神花露水视频号投放方案（示例）</h3>
+        <div class="hint">AI 生成 · 2026-09-29 · 引用行业数据与素材中心洞察</div>
 
         <div class="proposal-sec"><h4>一、行业与人群洞察</h4>
           <p>家清个护赛道 2025 年线上增速 12.4%，驱蚊品类 5–8 月为销售高峰，9 月进入换季囤货与户外场景窗口期。核心人群：25–45 岁家庭女性（决策人）、露营 / 户外人群（增量）。视频类信息流广告为大盘增长最快品类（2025 同比 +18.85%），建议以视频为主力形态。</p></div>
@@ -532,35 +881,39 @@ footer{padding:0 28px 24px;font-size:11.5px;color:var(--txt3)}
     <div class="chat-wrap">
       <div class="chat">
         <div class="chat-body" id="chatBody">
-          <div class="msg bot"><div class="avatar">AI</div><div class="bubble">早上好。我是众夏 Agent，已经连上媒介、运营、素材、提案四个域的数据。<br>今天有三件事需要你优先处理：<br>1. 风控高危：运营丙名下 4 次政治元素拒审；<br>2. 运营盯盘：3 人触发红标规则；<br>3. 素材队列：96 条高风险素材待人工复核。<br>你可以直接问我，例如"帮我盯一下今天的盘"。</div></div>
+          <div class="msg bot"><div class="avatar">AI</div><div class="bubble">早上好。我是众夏 Agent，已经连上经营、媒介、运营、素材、销售五个域的数据。<br>今天有四件事需要你优先处理：<br>1. 政策商机：京东 Q4 渠道激励发布，新签约首季免门槛，测算增量返点 ≈¥16.3 万，待拍板是否签约；<br>2. 风控高危：运营丙名下 4 次政治元素拒审；<br>3. 运营盯盘：3 人触发红标规则；<br>4. 素材队列：18 条高风险素材待人工重点复核。<br>你可以直接问我，例如"京东 Q4 新政值不值得签"。</div></div>
         </div>
         <div class="chat-input">
-          <input id="chatInput" placeholder="问点什么，比如：运营丙最近怎么样？" onkeydown="if(event.key==='Enter')sendChat()">
+          <input id="chatInput" placeholder="问点什么，比如：京东 Q4 新政值不值得签？" onkeydown="if(event.key==='Enter')sendChat()">
           <button class="btn primary" onclick="sendChat()">发送</button>
         </div>
       </div>
       <div class="chips">
         <div class="chip" onclick="ask('帮我盯一下今天的盘')">帮我盯一下今天的盘</div>
+        <div class="chip" onclick="ask('京东 Q4 新政值不值得签')">京东 Q4 新政值不值得签</div>
+        <div class="chip" onclick="ask('垫资红线怎么办')">垫资红线怎么办</div>
         <div class="chip" onclick="ask('运营丙最近表现怎么样')">运营丙最近表现怎么样</div>
         <div class="chip" onclick="ask('本周素材审核压力多大')">本周素材审核压力多大</div>
         <div class="chip" onclick="ask('Q3 返点进度核一下')">Q3 返点进度核一下</div>
-        <div class="chip" onclick="ask('把六神提案的预算分配再核一遍')">把六神提案的预算分配再核一遍</div>
+        <div class="chip" onclick="ask('臻美护肤续费还有救吗')">臻美护肤续费还有救吗</div>
+        <div class="chip" onclick="ask('把上海家化提案的预算分配再核一遍')">把上海家化提案的预算分配再核一遍</div>
+        <div class="chip" onclick="ask('杰士邦 CID 方案给我讲讲')">杰士邦 CID 方案给我讲讲</div>
       </div>
     </div>
   </section>
 
   </div>
-  <footer>众夏智能工作台 Demo · 所有数据均为示例数据 · 红标规则、AI 预审、Agent 诊断为演示逻辑 · 2026-09-22</footer>
+  <footer>北京众夏网络科技有限公司 · 众夏 AI 工作台（整合版 Demo）· 所有数据均为示例数据 · 红标规则、AI 预审、Agent 诊断为演示逻辑 · 京东政策要点摘自官方文件《2026 年渠道代理商激励政策 · 基础激励 / 电商引流类代理》 · 2026-09-29</footer>
 </div>
 
 <script>
 var pages = {
-  overview:['总览','四域汇总 · AI 今日建议'],
-  media:['媒介经营','端口消耗 · 内外循环 · 返点测算 · 风控巡查 · 自动充值'],
-  ops:['运营盯盘','跑品看板 · 红标规则 · 员工诊断 · 人才建议'],
-  creative:['素材中心','AI 预审 · 批量审批 · 素材诊断 · 文案生成'],
-  proposal:['提案中心','AI 提案生成器 · 行业素材洞察'],
-  agent:['Agent 助手','盯盘 · 诊断 · 监控 · 问答']
+  boss:['经营驾驶舱','五域汇总 · AI 今日建议 · 一屏决策'],
+  media:['媒介经营 · 大脑','政策雷达 → 业务指令 · 端口消耗 · 返点测算 · 风控巡查'],
+  ops:['运营盯盘','跑品看板 · 红标规则 · 账户诊断 · 员工诊断 · 人才建议'],
+  creative:['素材中心','AI 预审 · 批量审批 · 生命周期 · 素材诊断 · 文案生成'],
+  sales:['销售与提案','AI 商机 · 客户经营 · AI 提案生成器'],
+  agent:['Agent 助手','盯盘 · 诊断 · 监控 · 问答 · 跨域调度']
 };
 var charts = {};
 function showPage(id){
@@ -569,6 +922,7 @@ function showPage(id){
   document.querySelectorAll('.nav a').forEach(function(a){a.classList.toggle('active', a.dataset.page===id)});
   document.getElementById('pageTitle').textContent = pages[id][0];
   document.getElementById('pageSub').textContent = pages[id][1];
+  window.scrollTo({top:0,behavior:'smooth'});
   initCharts(id);
 }
 document.querySelectorAll('.nav a').forEach(function(a){a.addEventListener('click',function(){showPage(a.dataset.page)})});
@@ -578,13 +932,13 @@ document.querySelectorAll('[data-goto]').forEach(function(b){b.addEventListener(
 function initCharts(id){
   if(id==='media' && !charts.media){
     var labels=[], data=[];
-    var base=1200;
-    for(var i=0;i<47;i++){
+    var base=150; /* 单位：万元，Q3 季度日均约 165 万 */
+    for(var i=0;i<90;i++){
       var d=new Date(2026,6,1+i);
       labels.push((d.getMonth()+1)+'/'+d.getDate());
-      var wob=Math.sin(i/4.5)*260 + Math.sin(i/9)*180;
-      var wk=(d.getDay()===0||d.getDay()===6)?-320:60;
-      data.push(Math.round(base+wob+wk+i*6));
+      var wob=Math.sin(i/4.5)*30 + Math.sin(i/9)*18;
+      var wk=(d.getDay()===0||d.getDay()===6)?-30:5;
+      data.push(Math.round(base+wob+wk+i*0.35));
     }
     var avg7=data.map(function(_,i){
       var s=0,n=0;
@@ -603,7 +957,7 @@ function initCharts(id){
   }
   if(id==='ops' && !charts.ops){
     var lb=['00-02','02-04','04-06','06-08','08-10','10-12','12-14','14-16','16-18','18-20','20-22','22-24'];
-    var dd=[870,160,290,1290,1010,680,720,90,10,0,0,0];
+    var dd=[8700,1600,2900,12900,10100,6800,7200,900,100,0,0,0];
     charts.ops=new Chart(document.getElementById('chartOps'),{type:'bar',
       data:{labels:lb,datasets:[
         {label:'2小时段消耗（元）',data:dd,backgroundColor:'#1e6fff',borderRadius:4,barPercentage:0.6},
@@ -617,45 +971,45 @@ function initCharts(id){
       data:{labels:['政治元素','夸大宣传','竞品对比','版权风险','其他'],datasets:[{data:[38,26,14,12,10],backgroundColor:['#e24b4a','#f0997b','#f0b429','#9c6bff','#b4b2a9'],borderWidth:2,borderColor:'#fff'}]},
       options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{boxWidth:10,font:{size:11}}}}}});
   }
-  if(id==='proposal' && !charts.budget){
+  if(id==='sales' && !charts.budget){
     charts.budget=new Chart(document.getElementById('chartBudget'),{type:'doughnut',
       data:{labels:['腾讯广告 ¥18万 · 60%','巨量引擎 ¥12万 · 40%'],datasets:[{data:[18,12],backgroundColor:['#1e6fff','#4cc3ff'],borderWidth:2,borderColor:'#fff'}]},
       options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}}});
   }
 }
 
-/* ===== 运营周期明细 ===== */
+/* ===== 运营周期明细（电商引流一组 · 单位：元）===== */
 var opsData={
   day:{rows:[
-    {n:'运营甲',c:884.68,g:879.90,r:0.9948,o:18,p:48.88},
-    {n:'运营乙',c:2902.81,g:3815.50,r:1.3144,o:128,p:29.81},
-    {n:'运营丙',c:715.47,g:698.70,r:0.9766,o:13,p:53.75},
-    {n:'运营丁',c:549.60,g:798.00,r:1.4520,o:20,p:39.90}],
-    total:{c:5052.56,g:6192.10,r:1.2256,o:179,p:34.59}},
+    {n:'运营甲',c:8846.80,g:8799.00,r:0.9946,o:18,p:488.80},
+    {n:'运营乙',c:29028.10,g:38155.00,r:1.3144,o:128,p:298.10},
+    {n:'运营丙',c:7154.70,g:6987.00,r:0.9766,o:13,p:537.50},
+    {n:'运营丁',c:5496.00,g:7980.00,r:1.4520,o:20,p:399.00}],
+    total:{c:50525.60,g:61921.00,r:1.2256,o:179,p:345.90}},
   yesterday:{rows:[
-    {n:'运营甲',c:3707.10,g:5007.90,r:1.3426,o:93,p:53.66},
-    {n:'运营乙',c:3838.86,g:4857.80,r:1.2054,o:163,p:29.80},
-    {n:'运营丙',c:10388.00,g:14058.20,r:1.3532,o:276,p:50.94},
-    {n:'运营丁',c:616.19,g:718.20,r:1.1655,o:18,p:39.90}],
-    total:{c:18641.14,g:24732.10,r:1.3267,o:552,p:44.80}},
+    {n:'运营甲',c:37071.00,g:50079.00,r:1.3509,o:93,p:538.48},
+    {n:'运营乙',c:38388.60,g:48578.00,r:1.2654,o:163,p:298.02},
+    {n:'运营丙',c:103880.00,g:140582.00,r:1.3532,o:276,p:509.36},
+    {n:'运营丁',c:6161.90,g:7182.00,r:1.1655,o:18,p:399.00}],
+    total:{c:185501.50,g:246421.00,r:1.3284,o:550,p:448.04}},
   week:{rows:[
-    {n:'运营甲',c:4591.78,g:5887.80,r:1.2822,o:111,p:53.04},
-    {n:'运营乙',c:6741.67,g:8673.30,r:1.2866,o:291,p:29.81},
-    {n:'运营丙',c:11103.47,g:14756.90,r:1.3292,o:289,p:51.06},
-    {n:'运营丁',c:1165.79,g:1516.20,r:1.3006,o:38,p:39.90}],
-    total:{c:23602.71,g:30834.20,r:1.3064,o:729,p:42.30}},
+    {n:'运营甲',c:45917.80,g:58878.00,r:1.2822,o:111,p:530.43},
+    {n:'运营乙',c:67416.70,g:86733.00,r:1.2865,o:291,p:298.05},
+    {n:'运营丙',c:111034.70,g:147569.00,r:1.3292,o:289,p:510.62},
+    {n:'运营丁',c:11657.90,g:15162.00,r:1.3006,o:38,p:399.00}],
+    total:{c:236027.10,g:308342.00,r:1.3064,o:729,p:422.97}},
   month:{rows:[
-    {n:'运营甲',c:19860.30,g:26120.40,r:1.3152,o:482,p:54.19},
-    {n:'运营乙',c:28910.20,g:37240.50,r:1.2881,o:1246,p:29.89},
-    {n:'运营丙',c:46230.80,g:61420.60,r:1.3285,o:1202,p:51.10},
-    {n:'运营丁',c:5480.20,g:7120.80,r:1.2994,o:178,p:40.00}],
-    total:{c:100481.50,g:131902.30,r:1.3127,o:3108,p:42.45}}
+    {n:'运营甲',c:198603.00,g:261204.00,r:1.3152,o:482,p:541.92},
+    {n:'运营乙',c:289102.00,g:372405.00,r:1.2881,o:1246,p:298.88},
+    {n:'运营丙',c:462308.00,g:614206.00,r:1.3286,o:1202,p:510.99},
+    {n:'运营丁',c:54802.00,g:71208.00,r:1.2994,o:178,p:400.04}],
+    total:{c:1004815.00,g:1319023.00,r:1.3127,o:3108,p:424.40}}
 };
 function fmt(n){return n.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function renderOps(k){
   var d=opsData[k], html='';
   d.rows.forEach(function(r){
-    var flag=(k==='day')&&(r.r<1.3||r.c<1000);
+    var flag=(k==='day')&&(r.r<1.3||r.c<10000);
     html+='<tr'+(flag?' class="flag"':'')+'><td>'+r.n+'</td><td class="num">'+fmt(r.c)+'</td><td class="num">'+fmt(r.g)+'</td><td class="num">'+r.r.toFixed(4)+'</td><td class="num">'+r.o+'</td><td class="num">'+fmt(r.p)+'</td><td>'+(flag?'<span class="tag red">红标</span>':'<span class="tag green">正常</span>')+'</td></tr>';
   });
   html+='<tr class="total"><td>总计</td><td class="num">'+fmt(d.total.c)+'</td><td class="num">'+fmt(d.total.g)+'</td><td class="num">'+d.total.r.toFixed(4)+'</td><td class="num">'+d.total.o+'</td><td class="num">'+fmt(d.total.p)+'</td><td>—</td></tr>';
@@ -677,8 +1031,8 @@ var creatives=[
   {id:'HS-原创-cky-霜儿家真声-J2-视频号(9)',type:'视频 0:28',c:'上海XX食品',own:'H5 落地页',ai:'warn',ait:'需人工 · 绝对化用语',st:'wait'},
   {id:'HS-原创-cky-霜儿家真声-J2-视频号(13)',type:'视频 0:41',c:'杭州XX健康',own:'H5 落地页',ai:'ok',ait:'通过',st:'wait'},
   {id:'HS-原创-cky-霜儿家真声-J2-视频号(7)',type:'视频 0:33',c:'北京众夏',own:'视频号主页',ai:'ok',ait:'通过',st:'reject'},
-  {id:'创意增强Max-20260616',type:'视频 0:26',c:'六神（家化）',own:'视频号小店',ai:'ok',ait:'通过',st:'pass'},
-  {id:'图文-夏季驱蚊场景-v3',type:'图片 ×6',c:'六神（家化）',own:'视频号小店',ai:'warn',ait:'需人工 · 功效宣称',st:'wait'}
+  {id:'创意增强Max-20260616',type:'视频 0:26',c:'上海家化',own:'视频号小店',ai:'ok',ait:'通过',st:'pass'},
+  {id:'图文-夏季驱蚊场景-v3',type:'图片 ×6',c:'上海家化',own:'视频号小店',ai:'warn',ait:'需人工 · 功效宣称',st:'wait'}
 ];
 var stMap={wait:'<span class="tag gray">待审核</span>',pass:'<span class="tag green">已通过</span>',reject:'<span class="tag red">已打回</span>'};
 var aiMap={ok:'<span class="tag green">AI 通过</span>',warn:'<span class="tag amber">需人工</span>',bad:'<span class="tag red">高风险</span>'};
@@ -689,19 +1043,27 @@ document.getElementById('creativeRows').innerHTML=creatives.map(function(r,i){
 
 /* ===== Agent 聊天 ===== */
 var answers={
-  '盘':'今天的盘面（14:21 更新）：\n· 今日消耗 ¥16,650,000，较昨日 +12.3%，高于季度日均\n· 今日 GMV ¥21,480,000，综合 ROI 1.29\n· 红标提醒：运营甲（ROI 0.99）、运营丙（ROI 0.98）、运营丁（消耗 ¥549.6 < 1000）触发红标规则\n· 重点关注：客户「六神」账户 TX-88421 今日消耗骤降 -68%，已推送负责人确认\n建议先看运营盯盘的 2 小时分段趋势，下午 14 点后大盘明显缩量。',
+  '盘':'今天的盘面（14:21 更新）：\n· 今日消耗 ¥203.6 万，较昨日 +8.7%，高于季度日均 23.4%（双11 预热加投开始放量）\n· 今日 GMV ¥268.7 万，综合 ROI 1.32\n· 红标提醒：运营甲（ROI 0.99）、运营丙（ROI 0.98）、运营丁（消耗 5,496 元 < 1 万）触发红标规则\n· 重点关注：客户「上海家化」账户 TX-88421 今日消耗骤降 -68%，已推送负责人确认\n建议先看运营盯盘的 2 小时分段趋势，下午 14 点后大盘明显缩量。',
+  '京东':'京东 Q4 渠道代理商激励（10/1 生效，官方文件已抽取要点）：\n· 我司属新签约代理（2024 年至今未合作），首季免消耗门槛 —— 这是最大的窗口红利\n· 基础激励：站内 RTB 0.5%（门槛 ≥80 万）、站外 RTB / 合约 0.5%（门槛 ≥20 万）\n· 任务激励：站外 RTB 快手（客保外）封顶 8.0%、腾讯/字节封顶 1.0%、百度/京X 封顶 3.0%；京腾合约年度 ≥200 万起、封顶 11%\n· 客户数激励：单客户消耗 ≥2,000 元计入，最高 0.5%\n测算：站外 RTB 引流 ¥480 万 + 站内 ¥150 万 → Q4 增量返点 ≈¥16.3 万；若隆力奇 ¥800 万年框改签京腾合约，年度上限机会 ¥72 万\n建议：值得签。风险点是返点季度/年度结算带来的垫资周期变长，需与当前现金流红线（¥150 万）一并评估。媒介经营页已生成运营/销售指令。',
+  '垫资':'垫资与现金流（截至今日）：\n· 垫资占用 ¥96 万，现金余额 ¥385 万，红线 ¥150 万\n· 双11 预热加投开始放量（今日消耗高于季度日均 23.4%），按当前节奏预计 10 月中触及红线\n· 两套应对：① 优先与 2 家账期 90 天客户重谈账期；② 评估保理成本 vs 业务毛利空间\n· 联动提示：京东返点为季度/年度结算，若签约京东代理，垫资周期进一步拉长，签约前建议先做压力测算\n你选定方向后，我可以生成谈判要点与测算表，由你决策。',
   '丙':'运营丙近 30 日诊断（每日自动更新）：\n· 素材通过率 86.9%（★★★），但个别账户低至 53%\n· 日均操作 65.6 次（★★★★），但 80% 是修改，反复调整效率低（★★）\n· 15% 账户闲置，突击式工作（★★）\n· 近 7 日 4 次"政治元素"拒审（★★，危险信号）\n· 62% 操作依赖自动化工具（★★）\n核心问题：工作模式偏向"批量复制 + 大量修改"，缺乏从源头把控素材质量和账户结构的习惯。建议今日内复核其名下 37 条在投素材。',
-  '素材':'本周素材队列：\n· 昨天新增 2,463 条，待人工审批 2,246 条\n· AI 预审已全部完成：标记高风险 217 条，其中 96 条建议优先复核\n· 今日已审批 204 条，人工通过率 97.5%\n· 拒审原因 Top3：政治元素 38%、夸大宣传 26%、竞品对比 14%\n建议：先批量通过 AI 放行的 1,872 条，再集中处理 96 条高风险，预计可把队列压缩 40%。',
-  '返点':'Q3 返点经营测算（截至 09-22）：\n· 季度累计消耗 ¥6.82 亿，综合返点率 6.8%，返点预估 ¥4,663.2 万\n· 腾讯：¥4.27 亿 · 返点 6.8% · 目标完成度 71.2%（正常）\n· 巨量：¥1.58 亿 · 返点 6.2% · 65.8%（正常）\n· 快手：¥0.62 亿 · 返点 7.5% · 68.9%（偏慢，建议关注）\n· 小红书：¥0.35 亿 · 返点 9.0% · 70.0%（正常）\n整体进度 69.6%，若近 7 日节奏（低于区间均值 3.1%）延续，Q3 预计低于框架目标约 2.4%。',
-  '六神':'六神提案的预算分配（月预算 ¥30 万）：\n· 腾讯广告（视频号）¥18 万 / 60% —— 内循环小店直投为主\n· 巨量引擎（抖音）¥12 万 / 40% —— 外循环 CID 引流视频号小店\n节奏：冷启动 20% → 爬坡 50% → 爆发 30%\n预估：月 GMV ¥48 万，综合 ROI 1.6（保守 1.3 / 乐观 1.9）\n提醒：六神今日有 1 个账户消耗骤降 -68%、另有 1 次超日预算 12% 已自动限流，建议提案节奏表与该账户现状对齐后再发客户。'
+  '素材':'本周素材队列：\n· 昨天新增 486 条，待人工审批 412 条\n· AI 预审已全部完成：标记高风险 41 条，其中 18 条建议优先复核\n· 今日已审批 96 条，人工通过率 97.9%\n· 拒审原因 Top3：政治元素 38%、夸大宣传 26%、竞品对比 14%\n· 联动：LT-0917 明日扩量 15% 且列入京东引流盘点，储备素材仅够 2.3 天，已优先排产并需补拍京东链路落地素材 3 条\n建议：先批量通过 AI 放行的 356 条，再集中处理 18 条高风险，预计可把队列压缩 40%。',
+  '返点':'Q3 返点经营测算（截至 09-29，已覆盖 90/91 天）：\n· 季度累计消耗 ¥1.49 亿，综合返点率 6.8%，返点预估 ¥1,013.5 万\n· 腾讯：¥9,040 万 · 返点 6.8% · 完成度 69.5%（正常）\n· 巨量：¥3,700 万 · 基准 6.2%（Q4 新政 7.7%）· 74.0%（正常）\n· 快手：¥1,370 万 · 返点 7.5% · 68.5%（偏慢，缺口约 ¥630 万）\n· 小红书：¥740 万 · 返点 9.0% · 70.5%（正常）\n整体完成度 70.5%，Q3 预计以 71% 左右收官；近 7 日节奏高于区间均值 6.2%（双11 预热加投）。',
+  '臻美':'臻美护肤续费风险全景：\n· 健康度 48 分，续费风险 82%；消耗连续 2 周下滑，对接人上周离职\n· 该客户贡献毛利 11%，历史数据显示高层介入后挽回率 65%\n· 建议动作：7 天内老板带队拜访 + 让步预案（返点让步幅度由你定）\n· 注意：臻美与隆力奇 10/3 巨量开屏 C 位撞期，若臻美流失，排期压力自然缓解，可作为谈判筹码之一\n所有涉及承诺与人情的话术我只会给草稿，最终表达需要你改写。',
+  '家化':'上海家化（六神花露水）提案的预算分配（月预算 ¥30 万）：\n· 腾讯广告（视频号）¥18 万 / 60% —— 内循环小店直投为主\n· 巨量引擎（抖音）¥12 万 / 40% —— 外循环 CID 引流视频号小店\n节奏：冷启动 20% → 爬坡 50% → 爆发 30%\n预估：月 GMV ¥48 万，综合 ROI 1.6（保守 1.3 / 乐观 1.9）\n提醒：上海家化今日有 1 个账户消耗骤降 -68%、另有 1 次超日预算 12% 已自动限流；另外上海家化在京东有旗舰店，若签约京东代理，其站外引流消耗可计入京东任务完成率（腾讯/字节档封顶 1.0%），建议提案节奏表对齐后再发客户。',
+  '杰士邦':'杰士邦「超凡持久三维一体」巨量引擎 CID 方案（真实已交付案例，9/17 版，已入案例库）：\n· 总盘：56 天 ¥154 万 —— 冷启 14 天 ¥10 万（日均 7,800）→ W3-W5 ¥60 万（日均 2.8 万）→ W6+ 双11 ¥84 万（日均 4 万，冲刺 5 万/天）\n· ROI 路径：0.85 → 1.1；冷启四步爬坡：搭建过审（1-2千/日）→ 素材测试（2-5千）→ 优质放大（5-8千）→ ROI 优化（1万）\n· 账户结构四层：冷启测试 500-1,000/条（最大转化）→ 精品放大 2,000-5,000/条 → 混剪扩量通投 3 万 → 大促冲刺 5 万\n· 定向：男性 25-40 全国（除偏远），兴趣游戏/电竞/科技/运动/成人用品，排除已购抢竞品人群\n· 素材：实拍:数字人:混剪 = 5:2:3，视觉走"电竞科技感 + 数码测评"路线规避品类合规风险\n· 政策联动：CID 引流京东自营店，消耗可计入京东站外 RTB 任务（字节档，完成率 ×0.8%，封顶 1.0%）\n已沉淀为提案模板「CID-京东链路-标准版」，新客提案可一键复用。'
 };
 function pick(q){
+  if(q.indexOf('杰士邦')>-1||q.indexOf('CID')>-1||q.indexOf('案例')>-1)return answers['杰士邦'];
+  if(q.indexOf('京东')>-1||q.indexOf('京准通')>-1||q.indexOf('新政')>-1)return answers['京东'];
+  if(q.indexOf('垫资')>-1||q.indexOf('现金')>-1||q.indexOf('资金')>-1)return answers['垫资'];
+  if(q.indexOf('臻美')>-1||q.indexOf('续费')>-1)return answers['臻美'];
   if(q.indexOf('丙')>-1)return answers['丙'];
   if(q.indexOf('素材')>-1||q.indexOf('审核')>-1)return answers['素材'];
   if(q.indexOf('返点')>-1)return answers['返点'];
-  if(q.indexOf('六神')>-1||q.indexOf('预算')>-1||q.indexOf('提案')>-1)return answers['六神'];
+  if(q.indexOf('六神')>-1||q.indexOf('家化')>-1||q.indexOf('预算')>-1||q.indexOf('提案')>-1)return answers['家化'];
   if(q.indexOf('盘')>-1||q.indexOf('盯')>-1||q.indexOf('今天')>-1)return answers['盘'];
-  return '我已经连上媒介、运营、素材、提案四个域。目前我能回答：今日盘面、单个运营的诊断、素材队列、返点进度、提案数据。你可以试试左侧的几个快捷问题。';
+  return '我已经连上经营、媒介、运营、素材、销售五个域。目前我能回答：今日盘面、京东 Q4 新政测算、垫资与现金流、单个运营的诊断、素材队列、返点进度、臻美续费风险、提案数据。你可以试试右侧的几个快捷问题。';
 }
 function addMsg(role,text){
   var b=document.getElementById('chatBody');
@@ -719,6 +1081,16 @@ function sendChat(){
   if(!i.value.trim())return;
   ask(i.value.trim()); i.value='';
 }
+
+/* ===== URL hash 深链：#media / #ops / #creative / #sales / #agent ===== */
+(function(){
+  var h=(location.hash||'').replace('#','');
+  if(pages[h]) showPage(h);
+  window.addEventListener('hashchange',function(){
+    var k=(location.hash||'').replace('#','');
+    if(pages[k]) showPage(k);
+  });
+})();
 </script>
 </body>
 </html>
